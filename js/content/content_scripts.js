@@ -27,7 +27,11 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
 		var res = request.data;
 		var _alert = true;
 		var hide_loading = true;
-		if(res.action == 'update_nonactive_sub_bl'){
+		if(res.action == 'non_active_user'){
+			_alert = false;
+			hide_loading = false;
+			resolve_non_active_user();
+		}else if(res.action == 'update_nonactive_sub_bl'){
 			_alert = false;
 			hide_loading = false;
 			promise_nonactive[res.id_unit]();
@@ -37,13 +41,14 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
 			window.open(mandatory_spending+'?key='+get_key()+'&rkpd=1', '_blank');
 		}else if(res.action == 'singkron_unit'){
 			window.data_unit = res.renja_link;
-			if(current_url.indexOf('skpd/'+config.tahun_anggaran+'/list/'+config.id_daerah+'') != -1){
+			if(
+				jQuery('h3.page-title').text().indexOf('Pengaturan Perangkat Daerah') != -1
+			){
 				jQuery('#table_skpd tbody tr').map(function(i, b){
 					var td = jQuery(b).find('td');
-					var id_skpd = td.find('ul.dropdown-menu li').eq(0).find('a').attr('onclick').split("'")[1];
-					id_skpd = id_skpd.split("'")[0];
+					var kode_skpd = td.eq(0).text().trim();
 					if(td.eq(1).find('a').length == 0){
-						td.eq(1).append(' <a class="btn btn-sm btn-info" target="_blank" href="'+data_unit[id_skpd]+'?key='+get_key()+'&rkpd=1">Print RENJA</a>');
+						td.eq(1).append(' <a class="btn btn-sm btn-info" target="_blank" href="'+data_unit[kode_skpd]+'?key='+get_key()+'&rkpd=1">Print RENJA</a>');
 					}
 				});
 				if(jQuery('.m-l-10').find('a').length == 0){

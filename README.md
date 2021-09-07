@@ -66,6 +66,10 @@ Semoga bermanfaat
 - Print mandatory spending di halaman Pengaturan > Data > Label (Tag) Sub Kegiatan
 - Update status non active di database lokal jika ada sub kegiatan yang dihapus di SIPD
 - Allow right click
+- Perbaikan bug error ubahSkpd saat singkron user tapd
+- Perbaikan singkron master penerima bantuan dan pilih ssh by id encrypted
+- Hapus duplikat item SSH & SBU
+- Upload data penerima HIBAH, BOS, BANSOS, BANKEU
 
 ### Pengembangan berikutnya:
 - Melengkapi dokumentasi penggunaan di halaman wiki
@@ -73,13 +77,17 @@ Semoga bermanfaat
 
 ### Video tutorial
 - Cara install chrome extension https://www.youtube.com/watch?v=VnySS0RE6zc&t=318s
-- Mencari Komponen SSH dengan ID Standar Harga di halaman input rincian belanja https://www.youtube.com/watch?v=ixiwcs7xz8g
+- Mencari Komponen SSH dengan ID Standar Harga di halaman input rincian belanja 
+    - v1 = https://www.youtube.com/watch?v=ixiwcs7xz8g
+	- v2 = https://youtu.be/2MgCu5J_jcs
+- Setting multi Standar Harga ke multi Rekening Belanja https://youtu.be/oIDmpfZm0kw
 - Export SSH SIPD ke Database Server Lokal https://www.youtube.com/watch?v=lcLXBwSq9Ng
 - Export RKA Kegiatan ke Database Server Lokal https://www.youtube.com/watch?v=t84n2jZUfFo
 - Setting Tanggal RKA dan Nama TAPD https://www.youtube.com/watch?v=3z9zn506oTw
 - Setting Tanggal RKA dan Nama TAPD di Aplikasi SIPD https://www.youtube.com/watch?v=UCroKhfaHKQ
 - Print Laporan APBD Lampiran III Semua Perangkat Daerah https://www.youtube.com/watch?v=QZKb8LrHcpg
 - Upload Excel Belanja Bantuan Keuangan Dana Desa https://www.youtube.com/watch?v=F3Db_v40Rh4
+- Upload Excel Data BOS v2.8.0 https://www.youtube.com/watch?v=ASEzt7RnO48
 - Release v1.9 perbaikan beberapa bug error dan menampilkan tanda tangan kepala daerah di lampiran APBD https://www.youtube.com/watch?v=UpQheTCkEN4
 - Ganti/update Rekening Multi Komponen di halaman rincian belanja https://www.youtube.com/watch?v=Wo6BdOCPb1g
 - Integrasi data SIPD ke SIMDA keuangan https://youtu.be/vFOsAlnxmTo

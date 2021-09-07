@@ -82,6 +82,9 @@ function get_tanggal(){
 }
 
 function run_download_excel(){
+	if(jQuery('#action-sipd').length >= 1){
+		return true;
+	}
 	var current_url = window.location.href;
 	var download_excel = ''
 		+'<div id="action-sipd" class="hide-print">'
@@ -94,75 +97,76 @@ function run_download_excel(){
 
 	var style = '';
 
-	style = jQuery('.cetak').attr('style');
-	if (typeof style == 'undefined'){ style = ''; };
-	jQuery('.cetak').attr('style', style+" font-family:'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; padding:0; margin:0; font-size:13px;");
+	// style = jQuery('.cetak').attr('style');
+	// if (typeof style == 'undefined'){ style = ''; };
+	// jQuery('.cetak').attr('style', style+"; font-family:'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; padding:0; margin:0; font-size:13px;");
 	
 	jQuery('.bawah').map(function(i, b){
 		style = jQuery(b).attr('style');
 		if (typeof style == 'undefined'){ style = ''; };
-		jQuery(b).attr('style', style+" border-bottom:1px solid #000;");
+		jQuery(b).attr('style', style+"; border-bottom:1px solid #000;");
 	});
 	
 	jQuery('.kiri').map(function(i, b){
 		style = jQuery(b).attr('style');
 		if (typeof style == 'undefined'){ style = ''; };
-		jQuery(b).attr('style', style+" border-left:1px solid #000;");
+		jQuery(b).attr('style', style+"; border-left:1px solid #000;");
 	});
 
 	jQuery('.kanan').map(function(i, b){
 		style = jQuery(b).attr('style');
 		if (typeof style == 'undefined'){ style = ''; };
-		jQuery(b).attr('style', style+" border-right:1px solid #000;");
+		jQuery(b).attr('style', style+"; border-right:1px solid #000;");
 	});
 
 	jQuery('.atas').map(function(i, b){
 		style = jQuery(b).attr('style');
 		if (typeof style == 'undefined'){ style = ''; };
-		jQuery(b).attr('style', style+" border-top:1px solid #000;");
+		jQuery(b).attr('style', style+"; border-top:1px solid #000;");
 	});
 
 	jQuery('.text_tengah').map(function(i, b){
 		style = jQuery(b).attr('style');
 		if (typeof style == 'undefined'){ style = ''; };
-		jQuery(b).attr('style', style+" text-align: center;");
+		jQuery(b).attr('style', style+"; text-align: center;");
 	});
 
 	jQuery('.text_kiri').map(function(i, b){
 		style = jQuery(b).attr('style');
 		if (typeof style == 'undefined'){ style = ''; };
-		jQuery(b).attr('style', style+" text-align: left;");
+		jQuery(b).attr('style', style+"; text-align: left;");
 	});
 
 	jQuery('.text_kanan').map(function(i, b){
 		style = jQuery(b).attr('style');
 		if (typeof style == 'undefined'){ style = ''; };
-		jQuery(b).attr('style', style+" text-align: right;");
+		jQuery(b).attr('style', style+"; text-align: right;");
 	});
 
 	jQuery('.text_block').map(function(i, b){
 		style = jQuery(b).attr('style');
 		if (typeof style == 'undefined'){ style = ''; };
-		jQuery(b).attr('style', style+" font-weight: bold;");
+		jQuery(b).attr('style', style+"; font-weight: bold;");
 	});
 
 	jQuery('.text_15').map(function(i, b){
 		style = jQuery(b).attr('style');
 		if (typeof style == 'undefined'){ style = ''; };
-		jQuery(b).attr('style', style+" font-size: 15px;");
+		jQuery(b).attr('style', style+"; font-size: 15px;");
 	});
 
 	jQuery('.text_20').map(function(i, b){
 		style = jQuery(b).attr('style');
 		if (typeof style == 'undefined'){ style = ''; };
-		jQuery(b).attr('style', style+" font-size: 20px;");
+		jQuery(b).attr('style', style+"; font-size: 20px;");
 	});
 
-	jQuery('td').map(function(i, b){
-		style = jQuery(b).attr('style');
+	var td = document.getElementsByTagName("td");
+	for(var i=0, l=td.length; i<l; i++){
+		style = td[i].getAttribute('style');
 		if (typeof style == 'undefined'){ style = ''; };
-		jQuery(b).attr('style', style+' mso-number-format:\\@;');
-	});
+		td[i].setAttribute('style', style+'; mso-number-format:\\@;');
+	};
 
 	jQuery('#excel').on('click', function(){
 		var name = "Laporan";
@@ -174,6 +178,8 @@ function run_download_excel(){
 			name = document.querySelectorAll('.cetak > table table')[1].querySelectorAll('tbody > tr')[7].querySelectorAll('td')[2].innerText;
 		}else if(current_url.indexOf('lampiran/'+config.tahun_anggaran+'/apbd') != -1){
 			name = jQuery('table[cellpadding="3"]>thead>tr').eq(1).text().trim();
+		}else if(document.querySelectorAll('td[colspan="20"]').length >= 1){
+			name = document.querySelectorAll('td[colspan="20"]')[0].innerText;
 		}
 		tableHtmlToExcel('rka', name);
 	});
@@ -330,7 +336,8 @@ function getDetailPenerima(kode_sbl, rek, nomor_lampiran){
 					}
 					var formDataCustom = new FormData();
 					formDataCustom.append('_token', tokek);
-					formDataCustom.append('skrim', Curut("rekening="+_rek));
+					formDataCustom.append('v1bnA1m', v1bnA1m);
+					formDataCustom.append('DsK121m', Curut("rekening="+_rek));
 					relayAjax({
 						url: rincsub[kode_sbl].lru13,
 						type: 'post',
@@ -606,7 +613,7 @@ function getKab(id_unit, id_prov, url){
 	});
 }
 
-function getProv(id_unit, url){
+function getProv(id_unit, url, full=false){
 	return new Promise(function(resolve, reject){
 		if(typeof(alamat) == 'undefined'){
 			getToken().then(function(_token){
@@ -618,20 +625,24 @@ function getProv(id_unit, url){
 					processData: false,
   					contentType: false,
 					success: function(ret){
-						alamat = {
-							kab: {}
-						};
-						jQuery('<select>'+ret+'</select>').find('option').map(function(i, b){
-							var val = jQuery(b).attr('value');
-							var nama = jQuery(b).text();
-							if(val!=0){
-								alamat[val] = { 
-									nama: nama,
-									val: val
-								};
-							}
-						});
-						return resolve(alamat);
+						if(full){
+							return resolve(ret);
+						}else{
+							alamat = {
+								kab: {}
+							};
+							jQuery('<select>'+ret+'</select>').find('option').map(function(i, b){
+								var val = jQuery(b).attr('value');
+								var nama = jQuery(b).text();
+								if(val!=0){
+									alamat[val] = { 
+										nama: nama,
+										val: val
+									};
+								}
+							});
+							return resolve(alamat);
+						}
 					}
 				});
 			});
@@ -822,7 +833,7 @@ function singkron_master_cse(val){
 				data_profile.profile[i].alamat_teks = profile.alamat_teks;
 				data_profile.profile[i].id_profil = profile.id_profil;
 				data_profile.profile[i].jenis_penerima = profile.jenis_penerima;
-				data_profile.profile[i].nama_teks = profile.nama_teks;
+				data_profile.profile[i].nama_teks = jQuery('<textarea>'+profile.nama_teks+'</textarea>').val();
 			});
 			var data = {
 			    message:{
@@ -1420,17 +1431,24 @@ function singkron_user_deskel_lokal(){
 
 function singkron_user_dewan_lokal(){
 	relayAjax({
-      	url: config.sipd_url+'daerah/main/plan/setup-user/'+config.tahun_anggaran+'/anggota-dewan/tampil/'+config.id_daerah+'/0',
-      	type: "GET",
+      	url: lru1,
+      	type: "POST",
+		data: formData,
+		processData: false,
+		contentType: false,
       	success: function(dewan){
       		var last = dewan.data.length-1;
+      		var first = true;
       		dewan.data.reduce(function(sequence, nextData){
                 return sequence.then(function(current_data){
             		return new Promise(function(resolve_reduce, reject_reduce){
+            			var url_detail = current_data.action.split("ubahUser('")[1].split("'")[0];
             			relayAjax({
-					      	url: config.sipd_url+'daerah/main/plan/setup-user/'+config.tahun_anggaran+'/kel-desa/detil/'+config.id_daerah+'/0',
+					      	url: endog+'?'+url_detail,
 					      	type: "POST",
-            				data:{"_token":tokek,"idxuser":current_data.id_user},
+							data: formData,
+							processData: false,
+							contentType: false,
 					      	success: function(detil){
 		            			var data_dewan = { 
 									action: 'singkron_user_dewan',
@@ -1475,21 +1493,67 @@ function singkron_user_dewan_lokal(){
 								data_dewan.data.nip = detil.nip;
 								data_dewan.data.notelp = detil.notelp;
 								data_dewan.data.npwp = detil.npwp;
-					      		var data = {
-								    message:{
-								        type: "get-url",
-								        content: {
-										    url: config.url_server_lokal,
-										    type: 'post',
-										    data: data_dewan,
-							    			return: false
-										}
-								    }
-								};
-								chrome.runtime.sendMessage(data, function(response) {
-								    console.log('responeMessage', response);
-						    		resolve_reduce(nextData);
-								});
+								data_dewan.data.id_sub_skpd = idune;
+					      		if(first){
+					      			first = false;
+									new Promise(function(resolve_reduce2, reject_reduce2){
+						      			var data_non_active_user = { 
+											action: 'non_active_user',
+											tahun_anggaran: config.tahun_anggaran,
+											api_key: config.api_key,
+											id_level: detil.idlevel,
+											id_sub_skpd: idune
+										};
+										var data_nonactive = {
+										    message:{
+										        type: "get-url",
+										        content: {
+												    url: config.url_server_lokal,
+												    type: 'post',
+												    data: data_non_active_user,
+									    			return: true
+												}
+										    }
+										};
+										chrome.runtime.sendMessage(data_nonactive, function(response) {
+										    console.log('responeMessage', response);
+								    		window.resolve_non_active_user = resolve_reduce2;
+										});
+									})
+									.then(function(){
+										var data = {
+										    message:{
+										        type: "get-url",
+										        content: {
+												    url: config.url_server_lokal,
+												    type: 'post',
+												    data: data_dewan,
+									    			return: false
+												}
+										    }
+										};
+										chrome.runtime.sendMessage(data, function(response) {
+										    console.log('responeMessage', response);
+								    		resolve_reduce(nextData);
+										});
+									});
+					      		}else{
+						      		var data = {
+									    message:{
+									        type: "get-url",
+									        content: {
+											    url: config.url_server_lokal,
+											    type: 'post',
+											    data: data_dewan,
+								    			return: false
+											}
+									    }
+									};
+									chrome.runtime.sendMessage(data, function(response) {
+									    console.log('responeMessage', response);
+							    		resolve_reduce(nextData);
+									});
+					      		}
 					      	}
 					    });
             		})
@@ -1504,7 +1568,7 @@ function singkron_user_dewan_lokal(){
                 });
             }, Promise.resolve(dewan.data[last]))
             .then(function(data_last){
-            	alert('Berhasil singkron data User Anggota Dewan!');
+            	alert('Berhasil singkron data User!');
             	jQuery('#wrap-loading').hide();
             });
       	}
@@ -1603,85 +1667,289 @@ function singkron_pengaturan_sipd_lokal(){
 
 function singkron_renstra_lokal(){
 	jQuery('#wrap-loading').show();
-	var id_unit = window.location.href.split('?')[0].split(''+config.id_daerah+'/')[1];
-	relayAjax({
-      	url: config.sipd_url+'daerah/main/'+get_type_jadwal()+'/renstra/'+config.tahun_anggaran+'/tampil-renstra/'+config.id_daerah+'/'+id_unit+'?filter_program=&filter_indi_prog=&filter_giat=&filter_skpd=',
-      	type: "GET",
-      	contentType: 'application/json',
-      	success: function(rens){
-      		var data_renstra = [];
-      		rens.data.map(function(b, i){
-      			data_renstra[i] = {};
-      			data_renstra[i].id_bidang_urusan = b.id_bidang_urusan;
-				data_renstra[i].id_giat = b.id_giat;
-				data_renstra[i].id_program = b.id_program;
-				data_renstra[i].id_renstra = b.id_renstra;
-				data_renstra[i].id_rpjmd = b.id_rpjmd;
-				data_renstra[i].id_sub_giat = b.id_sub_giat;
-				data_renstra[i].id_unit = b.id_unit;
-				data_renstra[i].indikator = b.indikator;
-				data_renstra[i].indikator_sub = b.indikator_sub;
-				data_renstra[i].is_locked = b.is_locked;
-				data_renstra[i].kebijakan_teks = b.kebijakan_teks;
-				data_renstra[i].kode_bidang_urusan = b.kode_bidang_urusan;
-				data_renstra[i].kode_giat = b.kode_giat;
-				data_renstra[i].kode_program = b.kode_program;
-				data_renstra[i].kode_skpd = b.kode_skpd;
-				data_renstra[i].kode_sub_giat = b.kode_sub_giat;
-				data_renstra[i].misi_teks = b.misi_teks;
-				data_renstra[i].nama_bidang_urusan = b.nama_bidang_urusan;
-				data_renstra[i].nama_giat = b.nama_giat;
-				data_renstra[i].nama_program = b.nama_program;
-				data_renstra[i].nama_skpd = b.nama_skpd;
-				data_renstra[i].nama_sub_giat = b.nama_sub_giat;
-				data_renstra[i].outcome = b.outcome;
-				data_renstra[i].pagu_1 = b.pagu_1;
-				data_renstra[i].pagu_2 = b.pagu_2;
-				data_renstra[i].pagu_3 = b.pagu_3;
-				data_renstra[i].pagu_4 = b.pagu_4;
-				data_renstra[i].pagu_5 = b.pagu_5;
-				data_renstra[i].pagu_sub_1 = b.pagu_sub_1;
-				data_renstra[i].pagu_sub_2 = b.pagu_sub_2;
-				data_renstra[i].pagu_sub_3 = b.pagu_sub_3;
-				data_renstra[i].pagu_sub_4 = b.pagu_sub_4;
-				data_renstra[i].pagu_sub_5 = b.pagu_sub_5;
-				data_renstra[i].sasaran_teks = b.sasaran_teks;
-				data_renstra[i].satuan = b.satuan;
-				data_renstra[i].satuan_sub = b.satuan_sub;
-				data_renstra[i].strategi_teks = b.strategi_teks;
-				data_renstra[i].target_1 = b.target_1;
-				data_renstra[i].target_2 = b.target_2;
-				data_renstra[i].target_3 = b.target_3;
-				data_renstra[i].target_4 = b.target_4;
-				data_renstra[i].target_5 = b.target_5;
-				data_renstra[i].target_sub_1 = b.target_sub_1;
-				data_renstra[i].target_sub_2 = b.target_sub_2;
-				data_renstra[i].target_sub_3 = b.target_sub_3;
-				data_renstra[i].target_sub_4 = b.target_sub_4;
-				data_renstra[i].target_sub_5 = b.target_sub_5;
-				data_renstra[i].tujuan_teks = b.tujuan_teks;
-				data_renstra[i].visi_teks = b.visi_teks;
-			});
-			var data = {
-			    message:{
-			        type: "get-url",
-			        content: {
-		                url: config.url_server_lokal,
-		                type: 'post',
-		                data: { 
-		                    action: 'singkron_renstra',
-		                    tahun_anggaran: config.tahun_anggaran,
-		                    api_key: config.api_key,
-		                    data: data_renstra
-		                },
-		            	return: true
-		            }
-			    }
-			};
-			chrome.runtime.sendMessage(data, function(response) {
-			    console.log('responeMessage', response);
-			});
-      	}
+	var sendData = [];
+	sendData.push( new Promise(function(resolve, reject){
+		relayAjax({
+	      	url: lru2,
+	        type: 'post',
+	        data: formData,
+	        processData: false,
+	        contentType: false,
+	        success: function (data) {
+	      		var data_renstra = { 
+	                action: 'singkron_renstra_tujuan',
+	                tahun_anggaran: config.tahun_anggaran,
+	                api_key: config.api_key,
+	                tujuan: []
+	            };
+	      		data.data.map(function(tujuan, i){
+	      			data_renstra.tujuan[i] = {};
+	      			data_renstra.tujuan[i].bidur_lock = tujuan.bidur_lock;
+					data_renstra.tujuan[i].id_bidang_urusan = tujuan.id_bidang_urusan;
+					data_renstra.tujuan[i].id_unik = tujuan.id_unik;
+					data_renstra.tujuan[i].id_unik_indikator = tujuan.id_unik_indikator;
+					data_renstra.tujuan[i].id_unit = tujuan.id_unit;
+					data_renstra.tujuan[i].indikator_teks = tujuan.indikator_teks;
+					data_renstra.tujuan[i].is_locked = tujuan.is_locked;
+					data_renstra.tujuan[i].is_locked_indikator = tujuan.is_locked_indikator;
+					data_renstra.tujuan[i].kode_bidang_urusan = tujuan.kode_bidang_urusan;
+					data_renstra.tujuan[i].kode_skpd = tujuan.kode_skpd;
+					data_renstra.tujuan[i].nama_bidang_urusan = tujuan.nama_bidang_urusan;
+					data_renstra.tujuan[i].nama_skpd = tujuan.nama_skpd;
+					data_renstra.tujuan[i].satuan = tujuan.satuan;
+					data_renstra.tujuan[i].status = tujuan.status;
+					data_renstra.tujuan[i].target_1 = tujuan.target_1;
+					data_renstra.tujuan[i].target_2 = tujuan.target_2;
+					data_renstra.tujuan[i].target_3 = tujuan.target_3;
+					data_renstra.tujuan[i].target_4 = tujuan.target_4;
+					data_renstra.tujuan[i].target_5 = tujuan.target_5;
+					data_renstra.tujuan[i].target_akhir = tujuan.target_akhir;
+					data_renstra.tujuan[i].target_awal = tujuan.target_awal;
+					data_renstra.tujuan[i].tujuan_teks = tujuan.tujuan_teks;
+					data_renstra.tujuan[i].urut_tujuan = tujuan.urut_tujuan;
+				});
+				var data = {
+				    message:{
+				        type: "get-url",
+				        content: {
+			                url: config.url_server_lokal,
+			                type: 'post',
+			                data: data_renstra,
+			            	return: false
+			            }
+				    }
+				};
+				chrome.runtime.sendMessage(data, function(response) {
+				    console.log('responeMessage', response);
+				});
+				resolve(true);
+	      	}
+	    });
+	}) );
+	sendData.push( new Promise(function(resolve, reject){
+		relayAjax({
+	      	url: lru3,
+	        type: 'post',
+	        data: formData,
+	        processData: false,
+	        contentType: false,
+	        success: function (data) {
+	      		var data_renstra = { 
+	                action: 'singkron_renstra_sasaran',
+	                tahun_anggaran: config.tahun_anggaran,
+	                api_key: config.api_key,
+	                sasaran: []
+	            };
+	      		data.data.map(function(sasaran, i){
+	      			data_renstra.sasaran[i] = {};
+	      			data_renstra.sasaran[i].bidur_lock = sasaran.bidur_lock;
+					data_renstra.sasaran[i].id_bidang_urusan = sasaran.id_bidang_urusan;
+					data_renstra.sasaran[i].id_misi = sasaran.id_misi;
+					data_renstra.sasaran[i].id_unik = sasaran.id_unik;
+					data_renstra.sasaran[i].id_unik_indikator = sasaran.id_unik_indikator;
+					data_renstra.sasaran[i].id_unit = sasaran.id_unit;
+					data_renstra.sasaran[i].id_visi = sasaran.id_visi;
+					data_renstra.sasaran[i].indikator_teks = sasaran.indikator_teks;
+					data_renstra.sasaran[i].is_locked = sasaran.is_locked;
+					data_renstra.sasaran[i].is_locked_indikator = sasaran.is_locked_indikator;
+					data_renstra.sasaran[i].kode_bidang_urusan = sasaran.kode_bidang_urusan;
+					data_renstra.sasaran[i].kode_skpd = sasaran.kode_skpd;
+					data_renstra.sasaran[i].kode_tujuan = sasaran.kode_tujuan;
+					data_renstra.sasaran[i].nama_bidang_urusan = sasaran.nama_bidang_urusan;
+					data_renstra.sasaran[i].nama_skpd = sasaran.nama_skpd;
+					data_renstra.sasaran[i].sasaran_teks = sasaran.sasaran_teks;
+					data_renstra.sasaran[i].satuan = sasaran.satuan;
+					data_renstra.sasaran[i].status = sasaran.status;
+					data_renstra.sasaran[i].target_1 = sasaran.target_1;
+					data_renstra.sasaran[i].target_2 = sasaran.target_2;
+					data_renstra.sasaran[i].target_3 = sasaran.target_3;
+					data_renstra.sasaran[i].target_4 = sasaran.target_4;
+					data_renstra.sasaran[i].target_5 = sasaran.target_5;
+					data_renstra.sasaran[i].target_akhir = sasaran.target_akhir;
+					data_renstra.sasaran[i].target_awal = sasaran.target_awal;
+					data_renstra.sasaran[i].tujuan_lock = sasaran.tujuan_lock;
+					data_renstra.sasaran[i].tujuan_teks = sasaran.tujuan_teks;
+					data_renstra.sasaran[i].urut_sasaran = sasaran.urut_sasaran;
+					data_renstra.sasaran[i].urut_tujuan = sasaran.urut_tujuan;
+				});
+				var data = {
+				    message:{
+				        type: "get-url",
+				        content: {
+			                url: config.url_server_lokal,
+			                type: 'post',
+			                data: data_renstra,
+			            	return: false
+			            }
+				    }
+				};
+				chrome.runtime.sendMessage(data, function(response) {
+				    console.log('responeMessage', response);
+				});
+				resolve(true);
+	      	}
+	    });
+	}) );
+	sendData.push( new Promise(function(resolve, reject){
+		relayAjax({
+	      	url: lru4,
+	        type: 'post',
+	        data: formData,
+	        processData: false,
+	        contentType: false,
+	        success: function (data) {
+	      		var data_renstra = { 
+	                action: 'singkron_renstra_program',
+	                tahun_anggaran: config.tahun_anggaran,
+	                api_key: config.api_key,
+	                program: []
+	            };
+	      		data.data.map(function(program, i){
+	      			data_renstra.program[i] = {};
+	      			data_renstra.program[i].bidur_lock = program.bidur_lock;
+					data_renstra.program[i].id_bidang_urusan = program.id_bidang_urusan;
+					data_renstra.program[i].id_misi = program.id_misi;
+					data_renstra.program[i].id_program = program.id_program;
+					data_renstra.program[i].id_unik = program.id_unik;
+					data_renstra.program[i].id_unik_indikator = program.id_unik_indikator;
+					data_renstra.program[i].id_unit = program.id_unit;
+					data_renstra.program[i].id_visi = program.id_visi;
+					data_renstra.program[i].indikator = program.indikator;
+					data_renstra.program[i].is_locked = program.is_locked;
+					data_renstra.program[i].is_locked_indikator = program.is_locked_indikator;
+					data_renstra.program[i].kode_bidang_urusan = program.kode_bidang_urusan;
+					data_renstra.program[i].kode_program = program.kode_program;
+					data_renstra.program[i].kode_sasaran = program.kode_sasaran;
+					data_renstra.program[i].kode_skpd = program.kode_skpd;
+					data_renstra.program[i].kode_tujuan = program.kode_tujuan;
+					data_renstra.program[i].nama_bidang_urusan = program.nama_bidang_urusan;
+					data_renstra.program[i].nama_program = program.nama_program;
+					data_renstra.program[i].nama_skpd = program.nama_skpd;
+					data_renstra.program[i].pagu_1 = program.pagu_1;
+					data_renstra.program[i].pagu_2 = program.pagu_2;
+					data_renstra.program[i].pagu_3 = program.pagu_3;
+					data_renstra.program[i].pagu_4 = program.pagu_4;
+					data_renstra.program[i].pagu_5 = program.pagu_5;
+					data_renstra.program[i].program_lock = program.program_lock;
+					data_renstra.program[i].sasaran_lock = program.sasaran_lock;
+					data_renstra.program[i].sasaran_teks = program.sasaran_teks;
+					data_renstra.program[i].satuan = program.satuan;
+					data_renstra.program[i].status = program.status;
+					data_renstra.program[i].target_1 = program.target_1;
+					data_renstra.program[i].target_2 = program.target_2;
+					data_renstra.program[i].target_3 = program.target_3;
+					data_renstra.program[i].target_4 = program.target_4;
+					data_renstra.program[i].target_5 = program.target_5;
+					data_renstra.program[i].target_akhir = program.target_akhir;
+					data_renstra.program[i].target_awal = program.target_awal;
+					data_renstra.program[i].tujuan_lock = program.tujuan_lock;
+					data_renstra.program[i].tujuan_teks = program.tujuan_teks;
+					data_renstra.program[i].urut_sasaran = program.urut_sasaran;
+					data_renstra.program[i].urut_tujuan = program.urut_tujuan;
+				});
+				var data = {
+				    message:{
+				        type: "get-url",
+				        content: {
+			                url: config.url_server_lokal,
+			                type: 'post',
+			                data: data_renstra,
+			            	return: false
+			            }
+				    }
+				};
+				chrome.runtime.sendMessage(data, function(response) {
+				    console.log('responeMessage', response);
+				});
+				resolve(true);
+	      	}
+	    });
+	}) );
+	sendData.push( new Promise(function(resolve, reject){
+		relayAjax({
+	      	url: lru5,
+	        type: 'post',
+	        data: formData,
+	        processData: false,
+	        contentType: false,
+	        success: function (data) {
+	      		var data_renstra = { 
+	                action: 'singkron_renstra_kegiatan',
+	                tahun_anggaran: config.tahun_anggaran,
+	                api_key: config.api_key,
+	                kegiatan: []
+	            };
+	      		data.data.map(function(kegiatan, i){
+	      			data_renstra.kegiatan[i] = {};
+	      			data_renstra.kegiatan[i].bidur_lock = kegiatan.bidur_lock;
+					data_renstra.kegiatan[i].giat_lock = kegiatan.giat_lock;
+					data_renstra.kegiatan[i].id_bidang_urusan = kegiatan.id_bidang_urusan;
+					data_renstra.kegiatan[i].id_giat = kegiatan.id_giat;
+					data_renstra.kegiatan[i].id_misi = kegiatan.id_misi;
+					data_renstra.kegiatan[i].id_program = kegiatan.id_program;
+					data_renstra.kegiatan[i].id_unik = kegiatan.id_unik;
+					data_renstra.kegiatan[i].id_unik_indikator = kegiatan.id_unik_indikator;
+					data_renstra.kegiatan[i].id_unit = kegiatan.id_unit;
+					data_renstra.kegiatan[i].id_visi = kegiatan.id_visi;
+					data_renstra.kegiatan[i].indikator = kegiatan.indikator;
+					data_renstra.kegiatan[i].is_locked = kegiatan.is_locked;
+					data_renstra.kegiatan[i].is_locked_indikator = kegiatan.is_locked_indikator;
+					data_renstra.kegiatan[i].kode_bidang_urusan = kegiatan.kode_bidang_urusan;
+					data_renstra.kegiatan[i].kode_giat = kegiatan.kode_giat;
+					data_renstra.kegiatan[i].kode_program = kegiatan.kode_program;
+					data_renstra.kegiatan[i].kode_sasaran = kegiatan.kode_sasaran;
+					data_renstra.kegiatan[i].kode_skpd = kegiatan.kode_skpd;
+					data_renstra.kegiatan[i].kode_tujuan = kegiatan.kode_tujuan;
+					data_renstra.kegiatan[i].kode_unik_program = kegiatan.kode_unik_program;
+					data_renstra.kegiatan[i].nama_bidang_urusan = kegiatan.nama_bidang_urusan;
+					data_renstra.kegiatan[i].nama_giat = kegiatan.nama_giat;
+					data_renstra.kegiatan[i].nama_program = kegiatan.nama_program;
+					data_renstra.kegiatan[i].nama_skpd = kegiatan.nama_skpd;
+					data_renstra.kegiatan[i].pagu_1 = kegiatan.pagu_1;
+					data_renstra.kegiatan[i].pagu_2 = kegiatan.pagu_2;
+					data_renstra.kegiatan[i].pagu_3 = kegiatan.pagu_3;
+					data_renstra.kegiatan[i].pagu_4 = kegiatan.pagu_4;
+					data_renstra.kegiatan[i].pagu_5 = kegiatan.pagu_5;
+					data_renstra.kegiatan[i].program_lock = kegiatan.program_lock;
+					data_renstra.kegiatan[i].renstra_prog_lock = kegiatan.renstra_prog_lock;
+					data_renstra.kegiatan[i].sasaran_lock = kegiatan.sasaran_lock;
+					data_renstra.kegiatan[i].sasaran_teks = kegiatan.sasaran_teks;
+					data_renstra.kegiatan[i].satuan = kegiatan.satuan;
+					data_renstra.kegiatan[i].status = kegiatan.status;
+					data_renstra.kegiatan[i].target_1 = kegiatan.target_1;
+					data_renstra.kegiatan[i].target_2 = kegiatan.target_2;
+					data_renstra.kegiatan[i].target_3 = kegiatan.target_3;
+					data_renstra.kegiatan[i].target_4 = kegiatan.target_4;
+					data_renstra.kegiatan[i].target_5 = kegiatan.target_5;
+					data_renstra.kegiatan[i].target_akhir = kegiatan.target_akhir;
+					data_renstra.kegiatan[i].target_awal = kegiatan.target_awal;
+					data_renstra.kegiatan[i].tujuan_lock = kegiatan.tujuan_lock;
+					data_renstra.kegiatan[i].tujuan_teks = kegiatan.tujuan_teks;
+					data_renstra.kegiatan[i].urut_sasaran = kegiatan.urut_sasaran;
+					data_renstra.kegiatan[i].urut_tujuan = kegiatan.urut_tujuan;
+				});
+				var data = {
+				    message:{
+				        type: "get-url",
+				        content: {
+			                url: config.url_server_lokal,
+			                type: 'post',
+			                data: data_renstra,
+			            	return: false
+			            }
+				    }
+				};
+				chrome.runtime.sendMessage(data, function(response) {
+				    console.log('responeMessage', response);
+				});
+				resolve(true);
+	      	}
+	    });
+	}) );
+	Promise.all(sendData)
+    .then(function(all_data){
+    	jQuery('#wrap-loading').hide();
+    	alert('Berhasil singkron data RENSTRA!');
     });
 }
 
@@ -2381,16 +2649,20 @@ function get_detail_skpd(id_unit){
 						success: function(data_all_skpd){
 							data_all_skpd.data.map(function(b, i){
 								if(id_unit == b.id_skpd){
-									var url_detail_skpd = b.action.split("ubahSkpd('")[1].split("'")[0];
-									relayAjax({
-										url: config.sipd_url+'daerah/main?'+url_detail_skpd,
-										type: 'post',
-										data: "_token="+tokek+'&v1bnA1m='+v1bnA1m,
-										success: function(data){
-											window.detail_skpd = data;
-											return resolve(data);
-										}
-									});
+									if(b.action.indexOf("ubahSkpd(") != -1){
+										var url_detail_skpd = b.action.split("ubahSkpd('")[1].split("'")[0];
+										relayAjax({
+											url: config.sipd_url+'daerah/main?'+url_detail_skpd,
+											type: 'post',
+											data: "_token="+tokek+'&v1bnA1m='+v1bnA1m,
+											success: function(data){
+												window.detail_skpd = data;
+												return resolve(data);
+											}
+										});
+									}else{
+										return resolve(false);
+									}
 								}
 							});
 						}
@@ -2406,7 +2678,7 @@ function get_detail_skpd(id_unit){
 function get_kode_from_rincian_page(opsi, kode_sbl){
 	return new Promise(function(resolve, reject){
 		if(!opsi || !opsi.kode_bl){
-			var url_sub_keg = jQuery('.white-box .p-b-20 .btn-circle').attr('href');
+			var url_sub_keg = jQuery('.white-box .p-b-20 a.btn-circle').attr('href');
 			relayAjax({
 				url: url_sub_keg,
 				success: function(html){
@@ -2418,15 +2690,25 @@ function get_kode_from_rincian_page(opsi, kode_sbl){
 						processData: false,
 						contentType: false,
 						success: function(subkeg){
+							var cek = false;
+							// ganti menjadi true jika ingin mengsingkronkan sub keg yang tergembok / nomenklatur lama
+							var allow_lock_subkeg = false;
 							subkeg.data.map(function(b, i){
 								if(
-									b.nama_sub_giat.mst_lock != 3
+									(
+										allow_lock_subkeg 
+										|| b.nama_sub_giat.mst_lock != 3
+									)
 									&& b.kode_sub_skpd
 									&& b.kode_sbl == kode_sbl
 								){
+									cek = true;
 									return resolve({ url: b.action.split("detilGiat('")[1].split("'")[0], data: b });
 								}
-							})
+							});
+							if(!cek){
+								alert('Sub kegiatan ini tidak ditemukan di SIPD. (Sub kegiatan tergembok / sudah dihapus)');
+							}
 						}
 					});
 				}
@@ -2607,7 +2889,6 @@ function singkron_data_giat_lokal() {
 function singkron_sumber_dana_lokal() {
     if (confirm('Apakah anda yakin melakukan ini? data lama akan diupdate dengan data terbaru.')) {
         jQuery('#wrap-loading').show();
-        var id_unit = window.location.href.split('?')[0].split('' + config.id_daerah + '/')[1];
         relayAjax({
             url: lru1,
             type: 'post',
@@ -2650,6 +2931,229 @@ function singkron_sumber_dana_lokal() {
                 };
                 chrome.runtime.sendMessage(data, function (response) {
                     console.log('responeMessage', response);
+                });
+            }
+        })
+    }
+}
+
+function cek_duplikat_ssh(){
+    jQuery('#wrap-loading').show();
+    relayAjax({
+		url: lru1,
+		type: 'POST',
+		data: formData,
+		processData: false,
+		contentType: false,
+		success: function(data_ssh){
+			window.data_all_ssh = {};
+			window.duplikat_ssh = {};
+			var l1=0;
+			var l2=0;
+			var html_duplikat = '';
+			data_ssh.data.map(function(b, i){
+				var id_duplikat = b.nama_standar_harga+''+b.spek+''+b.satuan+''+b.harga;
+				if(typeof data_all_ssh[id_duplikat] == 'undefined'){
+					data_all_ssh[id_duplikat] = {
+						detail: []
+					};
+				}else{
+					if(typeof duplikat_ssh[id_duplikat] == 'undefined'){
+						duplikat_ssh[id_duplikat] = {
+							detail: []
+						};
+					}
+					duplikat_ssh[id_duplikat].detail.push(b);
+					l2++;
+				}
+				data_all_ssh[id_duplikat].detail.push(b);
+				l1++;
+			});
+			var no = 0;
+			for(var i in duplikat_ssh){
+				var id = [];
+				var url_hapus = [];
+				var ssh = duplikat_ssh[i].detail;
+				ssh.map(function(b, n){
+					id.push(b.id_standar_harga);
+					var url = b.action.split("hapusKomp('")[1].split("'")[0];
+					url_hapus.push(url);
+				});
+				no++;
+				html_duplikat += ''
+					+'<tr>'
+						+'<td>'+no+'</td>'
+						+'<td><input type="checkbox" class="list-ssh-duplikat" checked data-nama="'+ssh[0].nama_standar_harga +'('+id.join(', ')+')'+'" data-url="'+url_hapus.join(';')+'"> '+id.join(', ')+'</td>'
+						+'<td>'+ssh[0].nama_standar_harga+'</td>'
+						+'<td>'+ssh[0].spek+'</td>'
+						+'<td>'+ssh[0].satuan+'</td>'
+						+'<td>'+ssh[0].harga+'</td>'
+					+'</tr>';
+			}
+			console.log('data_all_ssh = '+l1, 'duplikat_ssh = '+l2);
+			jQuery('#wrap-loading').hide();
+			jQuery('#duplikat-komponen-akun .modal-title .info-title').html('( Jumlah Semua Data: '+l1+', Jumlah Duplikat: '+l2+' )');
+			run_script("jQuery('#table_duplikat').DataTable().clear();");
+			run_script("jQuery('#table_duplikat').DataTable().destroy();");
+			jQuery('#table_duplikat tbody').html(html_duplikat);
+			run_script("jQuery('#table_duplikat').DataTable({'columnDefs': [{ orderable: false, targets: 1 }], lengthMenu: [ [10, 250, 500, -1], [10, 250, 500, 'All'] ]});");
+			run_script("jQuery('#duplikat-komponen-akun').modal('show');");
+		}
+	});
+}
+
+function singkron_data_rpjmd_lokal() {
+    if (confirm('Apakah anda yakin melakukan ini? data lama akan diupdate dengan data terbaru.')) {
+        jQuery('#wrap-loading').show();
+        var formDataCustom = new FormData();
+        formDataCustom.append('_token', tokek);
+        formDataCustom.append('v1bnA1m', v1bnA1m);
+        formDataCustom.append('DsK121m', Curut("filter_program=&filter_indi_prog=&filter_skpd="));
+        relayAjax({
+            url: lru1,
+            type: 'post',
+            data: formDataCustom,
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                var data_rpjmd = {
+                    action: 'singkron_data_rpjmd',
+                    tahun_anggaran: config.tahun_anggaran,
+                    api_key: config.api_key,
+                    program: [],
+                    sasaran: [],
+                    tujuan: []
+                };
+                data.data.map(function (program, i) {
+                    data_rpjmd.program[i] = {};
+                    data_rpjmd.program[i].id_misi = program.id_misi;
+                    data_rpjmd.program[i].id_misi_old = program.id_misi_old;
+                    data_rpjmd.program[i].id_program = program.id_program;
+                    data_rpjmd.program[i].id_unik = program.id_unik;
+                    data_rpjmd.program[i].id_unik_indikator = program.id_unik_indikator;
+                    data_rpjmd.program[i].id_unit = program.id_unit;
+                    data_rpjmd.program[i].id_visi = program.id_visi;
+                    data_rpjmd.program[i].indikator = program.indikator;
+                    data_rpjmd.program[i].is_locked = program.is_locked;
+                    data_rpjmd.program[i].is_locked_indikator = program.is_locked_indikator;
+                    data_rpjmd.program[i].kode_sasaran = program.kode_sasaran;
+                    data_rpjmd.program[i].kode_skpd = program.kode_skpd;
+                    data_rpjmd.program[i].kode_tujuan = program.kode_tujuan;
+                    data_rpjmd.program[i].misi_teks = program.misi_teks;
+                    data_rpjmd.program[i].nama_program = program.nama_program;
+                    data_rpjmd.program[i].nama_skpd = program.nama_skpd;
+                    data_rpjmd.program[i].pagu_1 = program.pagu_1;
+                    data_rpjmd.program[i].pagu_2 = program.pagu_2;
+                    data_rpjmd.program[i].pagu_3 = program.pagu_3;
+                    data_rpjmd.program[i].pagu_4 = program.pagu_4;
+                    data_rpjmd.program[i].pagu_5 = program.pagu_5;
+                    data_rpjmd.program[i].program_lock = program.program_lock;
+                    data_rpjmd.program[i].sasaran_lock = program.sasaran_lock;
+                    data_rpjmd.program[i].sasaran_teks = program.sasaran_teks;
+                    data_rpjmd.program[i].satuan = program.satuan;
+                    data_rpjmd.program[i].status = program.status;
+                    data_rpjmd.program[i].target_1 = program.target_1;
+                    data_rpjmd.program[i].target_2 = program.target_2;
+                    data_rpjmd.program[i].target_3 = program.target_3;
+                    data_rpjmd.program[i].target_4 = program.target_4;
+                    data_rpjmd.program[i].target_5 = program.target_5;
+                    data_rpjmd.program[i].target_akhir = program.target_akhir;
+                    data_rpjmd.program[i].target_awal = program.target_awal;
+                    data_rpjmd.program[i].tujuan_lock = program.tujuan_lock;
+                    data_rpjmd.program[i].tujuan_teks = program.tujuan_teks;
+                    data_rpjmd.program[i].urut_misi = program.urut_misi;
+                    data_rpjmd.program[i].urut_sasaran = program.urut_sasaran;
+                    data_rpjmd.program[i].urut_tujuan = program.urut_tujuan;
+                    data_rpjmd.program[i].visi_teks = program.visi_teks;
+                })
+                relayAjax({
+                    url: lru5,
+                    type: 'post',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (data) {
+                        data.data.map(function (sasaran, i) {
+                            data_rpjmd.sasaran[i] = {};
+                            data_rpjmd.sasaran[i].id_misi = sasaran.id_misi;
+                            data_rpjmd.sasaran[i].id_misi_old = sasaran.id_misi_old;
+                            data_rpjmd.sasaran[i].id_sasaran = sasaran.id_sasaran;
+                            data_rpjmd.sasaran[i].id_unik = sasaran.id_unik;
+                            data_rpjmd.sasaran[i].id_unik_indikator = sasaran.id_unik_indikator;
+                            data_rpjmd.sasaran[i].id_visi = sasaran.id_visi;
+                            data_rpjmd.sasaran[i].indikator_teks = sasaran.indikator_teks;
+                            data_rpjmd.sasaran[i].is_locked = sasaran.is_locked;
+                            data_rpjmd.sasaran[i].is_locked_indikator = sasaran.is_locked_indikator;
+                            data_rpjmd.sasaran[i].kode_tujuan = sasaran.kode_tujuan;
+                            data_rpjmd.sasaran[i].misi_teks = sasaran.misi_teks;
+                            data_rpjmd.sasaran[i].sasaran_teks = sasaran.sasaran_teks;
+                            data_rpjmd.sasaran[i].satuan = sasaran.satuan;
+                            data_rpjmd.sasaran[i].status = sasaran.status;
+                            data_rpjmd.sasaran[i].target_1 = sasaran.target_1;
+                            data_rpjmd.sasaran[i].target_2 = sasaran.target_2;
+                            data_rpjmd.sasaran[i].target_3 = sasaran.target_3;
+                            data_rpjmd.sasaran[i].target_4 = sasaran.target_4;
+                            data_rpjmd.sasaran[i].target_5 = sasaran.target_5;
+                            data_rpjmd.sasaran[i].target_akhir = sasaran.target_akhir;
+                            data_rpjmd.sasaran[i].target_awal = sasaran.target_awal;
+                            data_rpjmd.sasaran[i].tujuan_lock = sasaran.tujuan_lock;
+                            data_rpjmd.sasaran[i].tujuan_teks = sasaran.tujuan_teks;
+                            data_rpjmd.sasaran[i].urut_misi = sasaran.urut_misi;
+                            data_rpjmd.sasaran[i].urut_sasaran = sasaran.urut_sasaran;
+                            data_rpjmd.sasaran[i].urut_tujuan = sasaran.urut_tujuan;
+                            data_rpjmd.sasaran[i].visi_teks = sasaran.visi_teks;
+                        });
+                        relayAjax({
+                            url: lru4,
+                            type: 'post',
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            success: function (data) {
+                                data.data.map(function (tujuan, i) {
+                                    data_rpjmd.tujuan[i] = {};
+                                    data_rpjmd.tujuan[i].id_misi = tujuan.id_misi;
+                                    data_rpjmd.tujuan[i].id_misi_old = tujuan.id_misi_old;
+                                    data_rpjmd.tujuan[i].id_tujuan = tujuan.id_tujuan;
+                                    data_rpjmd.tujuan[i].id_unik = tujuan.id_unik;
+                                    data_rpjmd.tujuan[i].id_unik_indikator = tujuan.id_unik_indikator;
+                                    data_rpjmd.tujuan[i].id_visi = tujuan.id_visi;
+                                    data_rpjmd.tujuan[i].indikator_teks = tujuan.indikator_teks;
+                                    data_rpjmd.tujuan[i].is_locked = tujuan.is_locked;
+                                    data_rpjmd.tujuan[i].is_locked_indikator = tujuan.is_locked_indikator;
+                                    data_rpjmd.tujuan[i].misi_lock = tujuan.misi_lock;
+                                    data_rpjmd.tujuan[i].misi_teks = tujuan.misi_teks;
+                                    data_rpjmd.tujuan[i].satuan = tujuan.satuan;
+                                    data_rpjmd.tujuan[i].status = tujuan.status;
+                                    data_rpjmd.tujuan[i].target_1 = tujuan.target_1;
+                                    data_rpjmd.tujuan[i].target_2 = tujuan.target_2;
+                                    data_rpjmd.tujuan[i].target_3 = tujuan.target_3;
+                                    data_rpjmd.tujuan[i].target_4 = tujuan.target_4;
+                                    data_rpjmd.tujuan[i].target_5 = tujuan.target_5;
+                                    data_rpjmd.tujuan[i].target_akhir = tujuan.target_akhir;
+                                    data_rpjmd.tujuan[i].target_awal = tujuan.target_awal;
+                                    data_rpjmd.tujuan[i].tujuan_teks = tujuan.tujuan_teks;
+                                    data_rpjmd.tujuan[i].urut_misi = tujuan.urut_misi;
+                                    data_rpjmd.tujuan[i].urut_tujuan = tujuan.urut_tujuan;
+                                    data_rpjmd.tujuan[i].visi_teks = tujuan.visi_teks;
+                                });
+                                var data = {
+                                    message: {
+                                        type: "get-url",
+                                        content: {
+                                            url: config.url_server_lokal,
+                                            type: 'post',
+                                            data: data_rpjmd,
+                                            return: true
+                                        }
+                                    }
+                                };
+                                chrome.runtime.sendMessage(data, function (response) {
+                                    console.log('responeMessage', response);
+                                });
+                            }
+                        });
+                    }
                 });
             }
         })

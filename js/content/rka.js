@@ -1,3 +1,21 @@
+window._token = jQuery('input[name="_tawon"]').val();
+window.v1bnA1m = jQuery('.logos input[type="hidden"]').val();
+
+if(typeof tokek == 'undefined'){
+  tokek = jQuery('input[name="_tawon"]').val();
+}
+if(typeof v1bnA1m == 'undefined'){
+  v1bnA1m = jQuery('.logos input[type="hidden"]').val();
+}
+
+window.formData = new FormData();
+if(typeof tokek != 'undefined'){
+  console.log('tokek', tokek);
+  console.log('v1bnA1m', v1bnA1m);
+  formData.append('_token', tokek);
+  formData.append('v1bnA1m', v1bnA1m);
+}
+
 var current_url = window.location.href;
 // fitur mempercepat pencarian SSH di sipd
 // tampilkan ID ssh pada tabel referensi SSH
@@ -73,93 +91,91 @@ jQuery('#set-ssh-sipd').on('click', function(){
 	jQuery("input[name=hargasatuan]").val(data_ssh['harga']);
 });
 
-// 4069518 contoh id ssh
-function tampilAkun(id, jenis_ssh){
-	var id_unit = window.location.href.split('?')[0].split(''+config.id_daerah+'/')[1];
-	jQuery('#idkomp').html('');
-	jQuery('#hargakomp').html('');
-	jQuery('#namakomp').html('');
-  	jQuery('#spekkomp').html('');
-  	jQuery('#satkomp').html('');
-  	
-  	jQuery('#table_komponen_akun').DataTable().clear();
-  	jQuery('#table_komponen_akun').DataTable().destroy();
-
-  	jQuery.ajax({
-        url: config.sipd_url+"daerah/main/budget/komponen/"+config.tahun_anggaran+"/"+jenis_ssh+"/detil-komp/"+config.id_daerah+"/"+id_unit,
-        type: "post",
-        data: "_token="+jQuery('meta[name=_token]').attr('content')+'&idkomponen='+id,
-        success: function(data){
-        	console.log('data', data);
-        	window.data_ssh = data;
-        	if(!data){
-        		jQuery('#mod-komponen-akun').modal('hide');
-        		jQuery('#wrap-loading').hide();
-        		alert('ID Standar Harga '+id+' tidak ditemukan!');
-        	}else{
-	          	jQuery('#idkomp').html(data['id_standar_harga']);
-	          	jQuery('#hargakomp').html(jQuery.fn.dataTable.render.number('.',',',0,'').display(data['harga']));
-	          	jQuery('#namakomp').html(data['kode_standar_harga']+' '+data['nama_standar_harga']);
-	          	jQuery('#spekkomp').html(data['spek']);
-	          	jQuery('#satkomp').html(data['satuan']);
-		      	jQuery('#table_komponen_akun').DataTable({
-			        pagingType: "full_numbers",
-			        dom:'tip',
-			        displayLength:20,
-			        ajax: {
-			            url: config.sipd_url+'daerah/main/budget/komponen/'+config.tahun_anggaran+'/'+jenis_ssh+'/tampil-komponen-akun/'+config.id_daerah+'/'+id_unit+"/" + id +'?app=budget',
-			            "dataSrc": function ( json ) {
-			                jQuery('#wrap-loading').hide();
-			                return json.data;
-			            }       
-			        },
-			        columns: [
-			          {data: 'id_akun', name: 'id_akun'},
-			          {data: 'nama_akun', name: 'nama_akun'},
-			          {data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-right'},
-			        ],
-		      	});
-		      	jQuery('#table_komponen_akun tbody').on('click', 'tr', function () {
-		            var id_akun = jQuery(this).find('td').eq(0).text();
-		            var cek = jQuery('select[name="akun"]').find('option[value="'+id_akun+'||"]').text();
-		            if(!cek){
-		            	var jenis_bel = jQuery('select[name="jenisbl"] option:selected').text();
-		            	return alert('Akun Rekening belanja ini tidak masuk dalam jenis belanja '+jenis_bel);
-		            }
-		            var current_rekbel = jQuery('select[name="akun"]').val();
-	        		jQuery('#mod-komponen-akun').modal('hide');
-	        		jQuery('#wrap-loading').hide();
-		            
-		            jQuery('select[name="akun"]').val(id_akun+'||').trigger('change');
-
-		            jQuery("input[name=idkomponen]").val(data['id_standar_harga']);
-		            jQuery("input[name=komponen]").val(data['nama_standar_harga']);
-		            jQuery("input[name=spek]").val(data['spek']);
-		            jQuery("input[name=satuan]").val(data['satuan']);
-		            jQuery("input[name=hargasatuan]").val(data['harga']);
-	          	});
-
-		      	jQuery('.dttable2-filter').keyup(function(e){
-		        	jQuery('#table_komponen_akun').DataTable().search(jQuery(this).val()).draw();
-		      	});
-		    }
+jQuery('#tambah-penerima-ex').on('click', function(){
+    var rekening = jQuery('select[name=akun] option:selected').val();
+    jQuery("input[name=filter-penerima]").val('');
+    jQuery('#table_penerima').DataTable().destroy();
+    jQuery('#table_penerima').DataTable({
+        scrollY:'40vh',
+        autoWidth: true,
+        serverSide: true,
+        responsive: true,
+        processing: true,
+        pagingType: "full_numbers",
+        dom:'rltip',
+        pageLength: 20,
+        lengthMenu: [
+            [20, 50, 100, -1],
+            [20, 50, 100, "All"] // change per page values here
+        ],
+        ajax: {
+            url: lru13,
+            type: "POST",
+            data: {
+                _token: _token,
+                v1bnA1m: v1bnA1m,
+                DsK121m: C3rYDq("rekening=8681||bos")
+            },
         },
-        error: function(e){
-        	console.log('data', e);
-    		jQuery('#mod-komponen-akun').modal('hide');
-    		jQuery('#wrap-loading').hide();
-    		return alert('ID Standar Harga '+id+' tidak ditemukan!');
+        columns: [
+        {data: 'id_profil', name: 'pr.id_profil',width:50},
+        {data: 'nama_teks', name: 'pr.nama_teks',width:200},
+        {data: 'alamat_teks', name: 'pr.alamat_teks',width:200},
+        {data: 'jenis_penerima', name: 'jenis_penerima',width:50, searchable: false},
+        ],
+        order:[['1','asc']],
+    });
+    jQuery("#table_penerima").DataTable().columns().header().to$().css("text-align", "left");
+    jQuery("#table_penerima").DataTable().columns().header().to$().css("padding-right", "10px");
+    jQuery("#table_penerima").DataTable().columns().header().to$().css("vertical-align", "middle");
+    jQuery('#mod-data-penerima').modal('show');
+    jQuery('.dtpenerima-filter',this).on('keyup change',function(){
+        if(jQuery('#table_penerima').DataTable().search() !== this.value){
+            jQuery('#table_penerima').DataTable().search( this.value ).draw();
         }
-  	});
-}
+    });
+});
+
+jQuery('select[name="prop_penerima"]').on('change', function(){
+    var _parent = jQuery(this).parent();
+    if(_parent.find('.id-info').length == 0){
+        _parent.find('label').append(' <span class="id-info"></span>');
+    }
+    _parent.find('.id-info').html('ID : '+jQuery(this).val());
+});
+jQuery('select[name="kab_kota_penerima"]').on('change', function(){
+    var _parent = jQuery(this).parent();
+    if(_parent.find('.id-info').length == 0){
+        _parent.find('label').append(' <span class="id-info"></span>');
+    }
+    _parent.find('.id-info').html('ID : '+jQuery(this).val());
+});
+jQuery('select[name="kecamatan_penerima"]').on('change', function(){
+    var _parent = jQuery(this).parent();
+    if(_parent.find('.id-info').length == 0){
+        _parent.find('label').append(' <span class="id-info"></span>');
+    }
+    _parent.find('.id-info').html('ID : '+jQuery(this).val());
+});
+jQuery('select[name="kelurahan_penerima"]').on('change', function(){
+    var _parent = jQuery(this).parent();
+    if(_parent.find('.id-info').length == 0){
+        _parent.find('label').append(' <span class="id-info"></span>');
+    }
+    _parent.find('.id-info').html('ID : '+jQuery(this).val());
+});
 
 var id_unit = window.location.href.split('?')[0].split(''+config.id_daerah+'/')[1];
+window.url_ssh = jQuery('span.hide-menu:contains("SSH")').closest('a').attr('href');
+window.url_sbu = jQuery('span.hide-menu:contains("SBU")').closest('a').attr('href');
+window.url_hspk = jQuery('span.hide-menu:contains("HSPK")').closest('a').attr('href');
+window.url_asb = jQuery('span.hide-menu:contains("ASB")').closest('a').attr('href');
 var komponen = ''
-	+'<label class="col-xs-12 font-bold" style="margin-top: 20px;">Cari Komponen dengan <a href="'+config.sipd_url+'daerah/main/budget/komponen/'+config.tahun_anggaran+'/1/list/'+config.id_daerah+'/'+id_unit+'" target="_blank">ID Standar Harga</a></label>'
-    +'<div class="col-xs-11">'
+	+'<label class="col-xs-12 font-bold" style="margin-top: 20px;">Cari Komponen dengan <a href="'+url_ssh+'" target="_blank">ID Encrypte Standar Harga</a></label>'
+    +'<div class="col-xs-10">'
       	+'<input class="form-control" type="text" placeholder="ID Standar Harga" id="komponen-id-sipd">'
     +'</div>'
-    +'<div class="col-xs-1">'
+    +'<div class="col-xs-2">'
       	+'<button class="fcbtn btn btn-danger btn-1b pull-right" id="cari-ssh-sipd" type="button" style="display: block;"><i class="fa fa-search"></i></button>'
     +'</div>';
 jQuery('.group-nama-komponen').append(komponen);
@@ -189,6 +205,15 @@ jQuery('#cari-ssh-sipd').on('click', function(){
 	}
 });
 
+var tombol_tambahan = ''
+    +'<button class="fcbtn btn btn-success btn-outline btn-1b" id="tampil-profil">'
+        +'<i class="fa fa-eye m-r-5"></i> <span>Tampil Profil</span>'
+    +'</button>';
+jQuery('.button-box').prepend(tombol_tambahan);
+jQuery('#tampil-profil').on('click', function(){
+    tampil_profil();
+});
+
 
 var modal = ''
 	+'<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/jszip.js"></script>'
@@ -206,10 +231,13 @@ var modal = ''
                       		+'<label class="control-label">Jenis Data Excel</label>'
                           	+'<select class="form-control" name="jenis_data" id="jenis_data">'
                                 +'<option value="">Pilih Format Data Excel</option>'
-                                +'<option value="dana-desa">Dana Desa / ADD (BANKEU)</option>'
+                                +'<option value="BANKEU">Belanja Bantuan Keuangan</option>'
                                 +'<option value="bagi-hasil">Belanja Bagi Hasil</option>'
                                 +'<option value="dana-bos">Dana BOS (BOS Pusat)</option>'
-                                +'<option value="upload-rincian">Upload Rincian</option>'
+                                +'<option value="HIBAH-BRG">Belanja Hibah (Barang/Jasa)</option>'
+                                +'<option value="HIBAH">Belanja Hibah (Uang)</option>'
+                                +'<option value="BANSOS-BRG">Belanja Bantuan Sosial (Barang/Jasa)</option>'
+                                +'<option value="BANSOS">Belanja Bantuan Sosial (Uang)</option>'
                             +'</select>'
                       	+'</div>'
                       	+'<div class="form-group">'
@@ -310,6 +338,7 @@ var modal = ''
         +'</div>'
     +'</div>';
 jQuery('body').append(modal);
+jQuery('#jenis_data').html(jQuery('select[name="jenisbl"]').html());
 var import_excel = ''
 	+'<button class="fcbtn btn btn-success btn-outline btn-1b" id="import_excel">'
 		+'<i class="fa fa-cloud-upload m-r-5"></i> <span>Import Excel</span>'
@@ -324,7 +353,6 @@ if(jQuery('button.tambah-detil').length >= 1 && config.tampil_edit_hapus_rinci){
         +'</button>';
 }
 jQuery('.tambah-detil').closest('.pull-right.p-t-20').prepend(import_excel);
-
 jQuery('#tampil_edit_del').on('click', function(){
     tampil_edit_del();
 });
@@ -345,12 +373,18 @@ jQuery('#hapus_multi_komponen').on('click', function(){
 		}
 		var rekening = '';
 		var kelompok = '';
-		var keterangan = '';
-		jQuery('#table_rinci tbody tr').map(function(i, b){
+    var keterangan = '';
+    var table_rinci = 'table_rinci';
+    var td_action = 7;
+    if(jQuery('#table_rinci').length == 0){
+      table_rinci = 'table_rinci_perubahan';
+      var td_action = 11;
+    }
+		jQuery('#'+table_rinci+' tbody tr').map(function(i, b){
 			var td = jQuery(b).find('td');
-			var val = td.eq(7).find('.btn-danger').attr('onclick');
+			var val = td.eq(td_action).find('.btn-danger').attr('onclick');
 			if(val){
-				val = val.split("'")[3];
+				val = val.split("'")[1];
 			}
 			if(td.eq(0).find('.hapus-multi-komponen').length == 0){
 				var onclick = '';
@@ -394,10 +428,14 @@ jQuery('#hapus_multi_komponen').on('click', function(){
 			selected.reduce(function(sequence3, nextData3){
 	            return sequence3.then(function(current_data3){
 	        		return new Promise(function(resolve_reduce3, reject_reduce3){
-						jQuery.ajax({
-			              	url: '../../hapus-rincian/'+config.id_daerah+'/'+id_unit,
+						relayAjax({
+			              	url: config.sipd_url+'daerah/main/?'+current_data3,
 			              	type: "POST",
-			              	data:{"_token": $('meta[name=_token]').attr('content'),"skrim":CR64('kodesbl='+kodesbl+'&idbelanjarinci='+current_data3+'&jeniskk=0')},
+			              	data:{
+                                _token: _token,
+                                v1bnA1m: v1bnA1m,
+                                DsK121m: C3rYDq('jeniskk=0')
+                            },
 			              	success: function(data){
 			              		resolve_reduce3(nextData3);
 			              	}
@@ -414,21 +452,23 @@ jQuery('#hapus_multi_komponen').on('click', function(){
 	            });
 	        }, Promise.resolve(selected[last]))
 	        .then(function(){
-				jQuery.ajax({
-                    url: "../../refresh-belanja/"+config.id_daerah+'/'+id_unit,
+                relayAjax({
+                    url: lru10,
                     type: "post",
-                    data:{"_token":jQuery('meta[name=_token]').attr('content'),"kodesbl":kodesbl},
+                    data: formData,
+                    processData: false,
+                    contentType: false,
                     success: function(hasil){
-                      	var res=hasil.split("||");
-                      	var pagu, rinci;
-                      	if(res[0]==0){ pagu=0; } else if(res[0]!=0){ pagu = jQuery.number(res[0],0,',','.'); }
-                      	if(res[1]==0){ rinci=0; } else if(res[1]!=0){ rinci = jQuery.number(res[1],0,',','.'); }
-                      	jQuery(".statustotalpagu").html(pagu);
-                      	jQuery(".statustotalrincian").html(rinci);
-						jQuery('#wrap-loading').hide();
-						alert('Berhasil hapus multi komponen!');
+                        var res=hasil.split("||");
+                        var pagu, rinci;
+                        if(res[0]==0){ pagu=0; } else if(res[0]!=0){ pagu = jQuery.number(res[0],0,',','.'); }
+                        if(res[1]==0){ rinci=0; } else if(res[1]!=0){ rinci = jQuery.number(res[1],0,',','.'); }
+                        jQuery(".statustotalpagu").html(pagu);
+                        jQuery(".statustotalrincian").html(rinci);
+                        jQuery('#wrap-loading').hide();
+                        alert('Berhasil hapus multi komponen!');
                     }
-              	});
+                });
               	if(thpStatus=="murni"){
                 	jQuery('#table_rinci').DataTable().ajax.reload();
               	}else if(thpStatus=="perubahan" || thpStatus=="pergeseran"){
@@ -456,53 +496,56 @@ jQuery('#jenis_data').on('change', function(){
 	if(jenis != ''){
 		jQuery('#label-excel').text('DOWNLOAD DI SINI');
 	}
-	if(jenis == 'dana-desa'){
-		jQuery('#label-excel').attr('href', ext_url+'excel/ADD-2021.xlsx');
-		jQuery('#jenis-bel-excel').html(jQuery('select[name="jenisbl"]').html());
-		jQuery('#jenis-bel-excel').val('BANKEU').trigger('change');
-		jQuery('#jenis-bel-excel').attr('disabled', true);
-		// jQuery('#rek-excel').html();
-		jQuery('#paket-excel').html(jQuery('select[name="subtitle"]').html());
-		jQuery('#keterangan-excel').html(jQuery('select[name="keterangan"]').html());
-		jQuery('#satuan-excel').html(jQuery('select[name="satuan1"]').html());
-		jQuery('#satuan-excel').select2();
-		jQuery('.group-dana-desa').show();
-	}else if(jenis == 'bagi-hasil'){
-		jQuery('#label-excel').attr('href', ext_url+'excel/ADD-2021.xlsx');
-		jQuery('#jenis-bel-excel').html(jQuery('select[name="jenisbl"]').html());
-		jQuery('#jenis-bel-excel').val('BAGI-HASIL').trigger('change');
-		jQuery('#jenis-bel-excel').attr('disabled', true);
-		// jQuery('#rek-excel').html();
-		jQuery('#paket-excel').html(jQuery('select[name="subtitle"]').html());
-		jQuery('#keterangan-excel').html(jQuery('select[name="keterangan"]').html());
-		jQuery('#satuan-excel').html(jQuery('select[name="satuan1"]').html());
-		jQuery('#satuan-excel').select2();
-		jQuery('.group-dana-desa').show();
-	}else if(jenis == 'dana-bos'){
-		jQuery('#label-excel').attr('href', ext_url+'excel/ADD-2021.xlsx');
-		jQuery('#jenis-bel-excel').html(jQuery('select[name="jenisbl"]').html());
-		jQuery('#jenis-bel-excel').val('BOS').trigger('change');
-		jQuery('#jenis-bel-excel').attr('disabled', true);
-		// jQuery('#rek-excel').html();
-		jQuery('#paket-excel').html(jQuery('select[name="subtitle"]').html());
-		jQuery('#keterangan-excel').html(jQuery('select[name="keterangan"]').html());
-		jQuery('#satuan-excel').html(jQuery('select[name="satuan1"]').html());
-		jQuery('#satuan-excel').select2();
-		jQuery('.group-dana-desa').show();
-	}
+    var cek = false;
+    if(
+        jenis == 'BANKEU'
+        || jenis == 'BAGI-HASIL'
+    ){
+        jQuery('#label-excel').attr('href', ext_url+'excel/BANKEU.xlsx');
+        jQuery('.group-dana-desa').show();
+        cek = true;
+    }else if(
+        jenis == 'BOS'
+        || jenis == 'HIBAH-BRG'
+        || jenis == 'HIBAH'
+        || jenis == 'BANSOS-BRG'
+        || jenis == 'BANSOS'
+    ){
+        jQuery('#label-excel').attr('href', ext_url+'excel/BOS-HIBAH.xlsx');
+        jQuery('.group-dana-desa').show();
+        cek = true;
+    }
+    if(cek){
+    	jQuery('#jenis-bel-excel').html(jQuery('select[name="jenisbl"]').html());
+    	jQuery('#jenis-bel-excel').val(jenis).trigger('change');
+    	jQuery('#jenis-bel-excel').attr('disabled', true);
+    	jQuery('#paket-excel').html(jQuery('select[name="subtitle"]').html());
+    	jQuery('#keterangan-excel').html(jQuery('select[name="keterangan"]').html());
+    	jQuery('#satuan-excel').html(jQuery('select[name="satuan1"]').html());
+    	jQuery('#satuan-excel').select2();
+    }else{
+        var text_jenis = jQuery(this).find('option:selected').text();
+        alert('Maaf jenis belanja "'+text_jenis+'" belum bisa diimport. Harap pilih jenis belanja yang lainnya!');
+    }
 });
 jQuery('#jenis-bel-excel').on('change', function(){
 	jQuery('#wrap-loading').show();
 	jQuery('#rek-excel').html('');
 	var jenisbl = jQuery(this).val();
 	if(jenisbl != ''){
-		jQuery.ajax({
-		    url: "../../cari-rekening/"+config.id_daerah+"/"+id_unit,
-		    type: "post",
-		    data: "_token="+jQuery('meta[name=_token]').attr('content')+'&idbl=0&idsubbl=0'+'&komponenkel='+jenisbl,
+        var customFormData = new FormData();
+        customFormData.append('_token', tokek);
+        customFormData.append('v1bnA1m', v1bnA1m);
+        customFormData.append('DsK121m', C3rYDq("komponenkel="+jenisbl));
+		relayAjax({
+    		url: lru3,
+            type: "post",
+            data: customFormData,
+            processData: false,
+            contentType: false,
 		    success: function(data){
 		      	jQuery("#rek-excel").html(data);
-				jQuery('#wrap-loading').hide();
+				    jQuery('#wrap-loading').hide();
 		    },
 		    error: function(jqXHR, textStatus, error){
 				jQuery('#wrap-loading').hide();
@@ -525,487 +568,17 @@ jQuery(function() {
     }
 });
 
-function insertRKA(){
-	var type_data = jQuery('#jenis_data').val();
-    if(type_data == ''){
-    	return alert('Jenis Data Excel tidak boleh kosong!');
-    }
-	var excel = jQuery('#file_output').val();
-	if(excel ==''){
-    	return alert('Data Excel tidak boleh kosong!');
-	}
-	excel = JSON.parse(excel);
-	var id_unit = window.location.href.split('?')[0].split(''+config.id_daerah+'/')[1];
-	var id_kel = jQuery('select[name="kelurahan"] option').filter(function () { return jQuery(this).html() == "Poncol"; }).val();
-	var jenis_belanja = jQuery('#jenis-bel-excel').val();
-	var id_rek_akun = jQuery('#rek-excel').val();
-	var id_pengelompokan = jQuery('#paket-excel').val();
-	var vol = jQuery('#volum-excel').val();
-	var satuantext = jQuery('#satuan-excel option:selected').text();
-	var satuan = jQuery('#satuan-excel').val();
-	jQuery('.tambah-detil').click();
-	getIdProv(id_unit).then(function(data_prov){
-		var sendData = excel.map(function(raw, i){
-			return new Promise(function(resolve, reject){
-				raw.id_unit = id_unit;
-	      		var id_prov = jQuery('<select>'+data_prov+'</select>').find('option').filter(function(){
-	      			return jQuery(this).html().toLocaleLowerCase().replace('provinsi ', '') == raw.prov.toLocaleLowerCase();
-	      		}).val();
-				// console.log('id_prov', id_prov, data_prov, raw.prov);
-	      		if(typeof id_prov == 'undefined'){
-	      			raw.error = 'Provinsi tidak ditemukan';
-	      			resolve(raw);
-	      		}else{
-					raw.id_prov = id_prov;
-					getIdKab(raw).then(function(id_kab){
-			      		if(typeof id_kab == 'undefined'){
-			      			raw.error = 'Kabupaten / Kota tidak ditemukan';
-			      			resolve(raw);
-			      		}else{
-							raw.id_kab = id_kab;
-							getIdKec(raw).then(function(id_kec){
-					      		if(typeof id_kec == 'undefined'){
-					      			raw.error = 'Kecamatan tidak ditemukan';
-					      			resolve(raw);
-					      		}else{
-							      	raw.id_kec = id_kec;
-					      			getIdKel(raw).then(function(id_kel){
-							      		if(typeof id_kel == 'undefined'){
-							      			raw.error = 'Desa / Kelurahan tidak ditemukan';
-							      			resolve(raw);
-							      		}else{
-							      			raw.id_kel = id_kel;
-							      			raw.kodesbl = jQuery('input[name="kodesbl"]').val();
-							      			setKeterangan(raw).then(function(id_ket){
-								      			raw.detil_rincian = {
-								      				jenis_belanja: jenis_belanja,
-								      				id_rek_akun: id_rek_akun,
-								      				id_pengelompokan: id_pengelompokan,
-								      				id_keterangan: id_ket
-								      			};
-								      			var skrim = ''
-								      				+'kodesbl='+raw.kodesbl
-								      				+'&idbelanjarinci='
-								      				+'&idakunrinci='
-								      				+'&jenisbl='+jenis_belanja
-									      			+'&akun='+encodeURIComponent(id_rek_akun)
-									      			+'&subtitle='+id_pengelompokan
-									      			+'&uraian_penerima='
-									      			+'&id_penerima='
-									      			+'&prop='+raw.id_prov
-									      			+'&kab_kota='+raw.id_kab
-									      			+'&kecamatan='+raw.id_kec
-									      			+'&kelurahan='+raw.id_kel
-									      			+'&komponenkel='
-									      			+'&komponen='
-									      			+'&idkomponen='
-									      			+'&spek='
-									      			+'&satuan='+encodeURIComponent(satuantext)
-									      			+'&hargasatuan='+(+raw.total.replace(/,/g, ''))
-									      			+'&keterangan='+id_ket
-									      			+'&volum1='+vol
-									      			+'&satuan1='+satuan
-									      			+'&volum2='
-									      			+'&satuan2='
-									      			+'&volum3='
-									      			+'&satuan3='
-									      			+'&volum4='
-									      			+'&satuan4=';
-										        raw.skrim = skrim;
-										        // resolve(raw); console.log(raw);
-								      			jQuery.ajax({
-										          	url: config.sipd_url+"daerah/main/budget/belanja/"+config.tahun_anggaran+"/rinci/simpan-belanjarinci/"+config.id_daerah+"/"+id_unit,
-										          	type: "post",
-										          	data: "_token="+jQuery('meta[name=_token]').attr('content')+'&skrim='+CR64(skrim),
-										          	success: function(data_kel){
-								      					resolve(raw);
-										          	},
-										          	error: function(jqXHR, textStatus, error){
-										      			raw.error = 'Error ajax simpan rincian';
-										      			resolve(raw);
-										          	}
-										       	});
-							      			})
-							      		}
-								    })
-								    .catch(function(e){
-										raw.error = 'Error ajax kelurahan';
-				      					resolve(raw);
-								    });
-						      	}
-					        })
-						    .catch(function(e){
-								raw.error = 'Error ajax kecamatan';
-		      					resolve(raw);
-						    });
-				      	}
-			        })
-				    .catch(function(e){
-						raw.error = 'Error ajax kabupaten';
-      					resolve(raw);
-				    });
-		      	}
-			})
-		    .catch(function(e){
-		        console.log(e);
-		        return Promise.resolve({});
-		    });
-		});
-		Promise.all(sendData)
-		.then(function(all_status){
-			console.log('all_status', all_status);
-			jQuery('.close-form').click();
-			jQuery.ajax({
-                url: "../../refresh-belanja/"+config.id_daerah+"/"+id_unit,
-                type: "post",
-                data:{"_token":jQuery('meta[name=_token]').attr('content'),"kodesbl":jQuery('input[name="kodesbl"]').val()},
-                success: function(hasil){
-                  	var res=hasil.split("||");
-                 	var pagu, rinci;
-                  	if(res[0]==0){ pagu=0; } else if(res[0]!=0){ pagu = jQuery.number(res[0],0,',','.'); }
-                  	if(res[1]==0){ rinci=0; } else if(res[1]!=0){ rinci = jQuery.number(res[1],0,',','.'); }
-                  	jQuery(".statustotalpagu").html(pagu);
-                  	jQuery(".statustotalrincian").html(rinci);
-					jQuery('#wrap-loading').hide();
-					var _error = [];
-					all_status.map(function(row, n){
-						if(row.error){
-							_error.push('"'+row.desa+'" error: ('+row.error+')');
-						}
-					});
-					var catatan = '';
-					if(_error.length > 0){
-						catatan = ' Catatan: '+_error.join(', ');
-					}
-					alert('Berhasil simpan data!'+catatan);
-                }
-          	});
-
-          	if(thpStatus=="murni"){
-                jQuery('#table_rinci').DataTable().ajax.reload();
-          	}else if(thpStatus=="perubahan" || thpStatus=="pergeseran"){
-                jQuery('#table_rinci_perubahan').DataTable().ajax.reload();
-          	}
-		})
-	    .catch(function(err){
-	        console.log('err', err);
-			alert('Ada kesalahan sistem!');
-			jQuery('#wrap-loading').hide();
-	    });
-    })
-    .catch(function(err){
-		alert('Error ajax provinsi');
-		jQuery('#wrap-loading').hide();
-    });
-}
-
-function getIdProv(id_unit){
-	return new Promise(function(resolve, reject){
-  		jQuery.ajax({
-	      	url: '../../tampil-provinsi/'+config.id_daerah+'/'+id_unit,
-	      	type: "post",
-	      	data: "_token="+$('meta[name=_token]').attr('content')+'&id_unit='+id_unit,
-	      	success: function(data_prov){
-	      		resolve(data_prov);
-          	},
-          	error: function(jqXHR, textStatus, error){
-      			reject();
-          	}
-        });
-	});
-}
-
-function getIdKab(raw){
-	return new Promise(function(resolve, reject){
-  		jQuery.ajax({
-        	url: "../../tampil-kab-kota/"+config.id_daerah+"/"+raw.id_unit,
-        	type: "post",
-        	data: "_token="+jQuery('meta[name=_token]').attr('content')+'&idprop='+raw.id_prov,
-            success: function(data_kab){
-	      		var id_kab = jQuery('<select>'+data_kab+'</select>').find('option').filter(function(){
-	      			return jQuery(this).html().toLocaleLowerCase().replace('kab. ', '') == raw.kab.toLocaleLowerCase();
-	      		}).val();
-	      		resolve(id_kab);
-          	},
-          	error: function(jqXHR, textStatus, error){
-      			reject();
-          	}
-        });
-	});
-}
-
-function getIdKec(raw){
-	return new Promise(function(resolve, reject){
-  		jQuery.ajax({
-          	url: "../../tampil-camat/"+config.id_daerah+"/"+raw.id_unit,
-          	type: "post",
-          	data: "_token="+jQuery('meta[name=_token]').attr('content')+'&idprop='+raw.id_prov+'&idkokab='+raw.id_kab,
-          	success: function(data_kec){
-            	var id_kec = jQuery('<select>'+data_kec+'</select>').find('option').filter(function(){
-	      			return jQuery(this).html().toLocaleLowerCase() == raw.kec.toLocaleLowerCase();
-	      		}).val();
-	      		resolve(id_kec);
-          	},
-          	error: function(jqXHR, textStatus, error){
-      			reject();
-          	}
-        });
-	});
-}
-
-function getIdKel(raw){
-	return new Promise(function(resolve, reject){
-		jQuery.ajax({
-	      	url: "../../tampil-lurah/"+config.id_daerah+"/"+raw.id_unit,
-	      	type: "post",
-	      	data: "_token="+jQuery('meta[name=_token]').attr('content')+'&idprop='+raw.id_prov+'&idkokab='+raw.id_kab+'&idcamat='+raw.id_kec,
-	      	success: function(data_kel){
-	        	var id_kel = jQuery('<select>'+data_kel+'</select>').find('option').filter(function(){
-	      			return jQuery(this).html().toLocaleLowerCase() == raw.desa.toLocaleLowerCase();
-	      		}).val();
-	      		resolve(id_kel);
-          	},
-          	error: function(jqXHR, textStatus, error){
-      			reject();
-          	}
-        });
-	});
-}
-
-function setKeterangan(raw){
-	return new Promise(function(resolve, reject){
-		var id_keterangan = jQuery('#keterangan-excel').val();
-		if(jQuery('#keterangan-otomatis').is(':checked')){
-			var _id_keterangan = jQuery('#keterangan-excel').find('option').filter(function(){
-      			return jQuery(this).html().toLocaleLowerCase() == raw.keterangan.toLocaleLowerCase();
-      		}).val();
-      		if(typeof _id_keterangan == 'undefined'){
-				jQuery.ajax({
-		          	url: "../../simpan-keterangan/"+config.id_daerah+"/"+raw.id_unit,
-		          	type: "POST",
-		          	data:{"_token": $('meta[name=_token]').attr('content'),"kodesbl":raw.kodesbl,"skrim":CR64('keterangan_add='+raw.keterangan)},
-		          	success: function(data){
-		          		jQuery("select[name=keterangan]").append('<option value ="'+data['id_ket_sub_bl']+'">'+data['ket_bl_teks']+'</option>');
-              			jQuery("select[name=keterangan]").val(data['id_ket_sub_bl']).trigger("change");
-		          		jQuery("#keterangan-excel").append('<option value ="'+data['id_ket_sub_bl']+'">'+data['ket_bl_teks']+'</option>');
-              			jQuery("#keterangan-excel").val(data['id_ket_sub_bl']).trigger("change");
-						return resolve(data['id_ket_sub_bl']);
-		          	}
-		        });
-			}else{
-				return resolve(_id_keterangan);
-			}
-		}else{
-			return resolve(id_keterangan);
-		}
-	});
-}
-
-function filePicked(oEvent) {
-    // Get The File From The Input
-    var oFile = oEvent.target.files[0];
-    var sFilename = oFile.name;
-    // Create A File Reader HTML5
-    var reader = new FileReader();
-
-    reader.onload = function(e) {
-      	var data = e.target.result;
-      	var workbook = XLSX.read(data, {
-        	type: 'binary'
-      	});
-
-      	workbook.SheetNames.forEach(function(sheetName) {
-	        // Here is your object
-	        var XL_row_object = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
-	        var type_data = jQuery('#jenis_data').val();
-	        if(type_data == ''){
-	        	return alert('Jenis Data Excel tidak boleh kosong!');
-	        }else if(
-	        	type_data == 'dana-desa'
-	        	|| type_data == 'bagi-hasil'
-	        ){
-	        	var data = [];
-	        	XL_row_object.map(function(row, i){
-	        		data_pasti = {};
-		        	data_pasti.no = row['NO'];
-		        	data_pasti.desa = row['DESA'];
-	        		data_pasti.total = row['PAGU'];
-	        		data_pasti.keterangan = '';
-	        		if(row['KETERANGAN']){
-	        			data_pasti.keterangan = row['KETERANGAN'];
-	        		}
-	        		data_pasti.kec = row['KECAMATAN'];
-	        		data_pasti.kab = row['KABUPATEN'];
-	        		data_pasti.prov = row['PROVINSI'];
-	        		data.push(data_pasti);
-	        	});
-		        var json_object = JSON.stringify(data);
-		        console.log(data);
-		        jQuery("#file_output").val(json_object);
-	        }else if(
-	        	type_data == 'dana-bos'
-	        ){
-	        	var data = [];
-	        	var kec = '';
-	        	var kab = '';
-	        	var prov = '';
-	        	XL_row_object.map(function(b, i){
-	        		console.log('b', b);
-	        	});
-		        var json_object = JSON.stringify(data);
-		        console.log(data);
-		        jQuery("#file_output").val(json_object);
-	        }
-      	});
-	};
-
-    reader.onerror = function(ex) {
-      console.log(ex);
-    };
-
-    reader.readAsBinaryString(oFile);
-}
-
-function select_all(opsi){
-	var tr_id = opsi.start;
-	var type = opsi.type;
-	var checked = opsi.checked;
-	if(type == 'all'){
-		jQuery('.hapus-multi-komponen').prop('checked', checked);
-	}else{
-		var cek = false;
-		jQuery('#table_rinci tbody tr').map(function(i, b){
-			if(i > tr_id && !cek){
-				var td = jQuery(b).find('td');
-				if(td.length == 1){
-					var text = td.eq(0).text();
-					if(type == 'kelompok' && text.indexOf('[#]') != -1){
-						cek = true;
-					}else if(
-						type == 'keterangan' 
-						&& (text.indexOf('[#]') != -1 || text.indexOf('[-]') != -1)
-					){
-						cek = true;
-					}else if(
-						type == 'rekening'
-					){
-						cek = true;
-					}
-				}
-				if(!cek){
-					td.eq(0).find('.hapus-multi-komponen').prop('checked', checked);
-				}
-			}
-		});
-	}
-}
-
-function gantiRekKomponen(type, selected){
-	jQuery('#wrap-loading').show();
-	jQuery('#mod-ganti-rek').modal('show');
-	var id_unit = window.location.href.split('?')[0].split(''+config.id_daerah+'/')[1];
-	var jenisbl = jQuery('select[name="jenisbl"]').val();
-	jQuery('#ganti-jbl-asal').html(jQuery('select[name="jenisbl"]').html());
-	jQuery('#ganti-jbl-asal').val(jenisbl);
-	jQuery('#simpan-ganti-rek').attr('data-type', type);
-	jQuery('.ganti-jbl').hide();
-	jQuery('.ganti-rekening').hide();
-	jQuery('.ganti-kelompok').hide();
-	jQuery('.ganti-keterangan').hide();
-	if(selected){
-		jQuery('#ganti-selected').val(selected.join(','));
-	}else{
-		jQuery('#ganti-selected').val(jQuery('input[name="idbelanjarinci"').val());
-	}
-	var kelompok_asal = jQuery('select[name="subtitle"]').val();
-	jQuery('.ganti-kelompok').show();
-	jQuery('.ganti-keterangan').show();
-	jQuery('#ganti-kelompok-asal').html(jQuery('select[name="subtitle"]').html());
-	jQuery('#ganti-kelompok-asal').val(kelompok_asal);
-  	jQuery("#pilih-ganti-kelompok").html(jQuery('select[name="subtitle"]').html());
-  	jQuery("#pilih-ganti-kelompok").val(kelompok_asal);
-	var keterangan_asal = jQuery('select[name="keterangan"]').val();
-	jQuery('#ganti-keterangan-asal').html(jQuery('select[name="keterangan"]').html());
-	jQuery('#ganti-keterangan-asal').val(keterangan_asal);
-  	jQuery("#pilih-ganti-keterangan").html(jQuery('select[name="keterangan"]').html());
-  	jQuery("#pilih-ganti-keterangan").val(keterangan_asal);
-	if(!type || type == 'rekening'){
-		jQuery('.ganti-jbl').show();
-		jQuery('.ganti-rekening').show();
-		jQuery('#mod-ganti-rek h4.modal-title').text('Ganti Rekening Sesuai Jenis Belanja');
-		var rek_asal = jQuery('select[name="akun"]').val();
-		jQuery('#ganti-rek-asal').html(jQuery('select[name="akun"]').html());
-		jQuery('#ganti-rek-asal').val(rek_asal);
-		jQuery.ajax({
-		    url: "../../cari-rekening/"+config.id_daerah+"/"+id_unit,
-		    type: "post",
-		    data: "_token="+jQuery('meta[name=_token]').attr('content')+'&idbl=0&idsubbl=0'+'&komponenkel='+jenisbl,
-		    success: function(data){
-		      	jQuery("#pilih-ganti-rek").html(data);
-		      	jQuery("#pilih-ganti-rek").val(rek_asal);
-				jQuery('#wrap-loading').hide();
-		    }
-		});
-	} else if(type == 'kelompok' || type == 'keterangan'){
-		jQuery('#mod-ganti-rek h4.modal-title').text('Ganti Kelompok atau Keterangan');
-		jQuery('#wrap-loading').hide();
-	}
-}
-
-function ubahKomponenAll(type, that){
-	var selected = [];
-	var checkbox = jQuery(that).parent().find('input');
-	var kelompok = checkbox.attr('kelompok');
-	var keterangan = checkbox.attr('keterangan');
-	var rekening = checkbox.attr('rekening');
-	jQuery('.hapus-multi-komponen').map(function(i, b){
-		if(jQuery(b).is(':checked')){
-			var _kelompok = jQuery(b).attr('kelompok');
-			var _keterangan = jQuery(b).attr('keterangan');
-			var _rekening = jQuery(b).attr('rekening');
-			var val = jQuery(b).val();
-			if(
-				val
-				&& (
-					(
-						type == 'rekening'
-						&& _kelompok == kelompok
-						&& _keterangan == keterangan
-						&& _rekening == rekening
-					)
-					|| (
-						type == 'keterangan'
-						&& _kelompok == kelompok
-						&& _keterangan == keterangan
-					)
-					|| (
-						type == 'kelompok'
-						&& _kelompok == kelompok
-					)
-				)
-			){
-				selected.push(val);
-			}
-		}
-	});
-	if(selected.length == 0){
-		alert('Pilih komponen dulu!');
-	}else{
-		console.log('selected', selected);
-        setTimeout(function(){
-    		var kodesbl = jQuery('input[name="kodesbl"]').val();
-    		ubahKomponen(kodesbl, selected[0], function(){
-    			gantiRekKomponen(type, selected);
-    		});
-        }, 500);
-	}
-}
-
 /* untuk memastikan kode_sbl berhasil tersetting */
 jQuery('.tambah-detil').click();
 jQuery('.tambah-detil').click();
 
-var f_ubah = ubahKomponen.toString().replace('function ubahKomponen(kodesbl,idblrinci){', 'function ubahKomponen(kodesbl,idblrinci, callback){').replace('$("select[name=satuan4]")', 'if(callback){ callback() }; $("select[name=satuan4]")');
+// tambahkan callback
+var f_ubah = ubahKomponen.toString().replace('function ubahKomponen(_0x5e0d9a){', 'function ubahKomponen(_0x5e0d9a, callback){');
+
+// jalankan callback setelah rincian berhasil diload (fungsi ini perlu sealalu diupdate ketika ada encrypt JS)
+f_ubah = f_ubah.replace('$("select[name=satuan4]")', 'if(callback){ callback() }; $("select[name=satuan4]")');
+
+// run function baru dan tambahkan tombol ganti rekening
 var ganti_rek = '<button class="btn btn-danger btn-sm pull-right" style="margin: 0px 0px 5px 0px" id="ganti-rek-sce" onclick="gantiRekKomponen(); return false;" type="button" id="open_ganti_rek">Ganti Rekening</button>';
 eval(f_ubah.replace(/.$/," if(jQuery('#open_ganti_rek').length==0){ jQuery('.group-kodrek-komponen label').eq(0).append('"+ganti_rek+"') } }"));
 
@@ -1042,11 +615,17 @@ jQuery('#simpan-ganti-rek').on("click", function(){
         					if(kodesbl && idblrinci && idblrinci==current_data){
                                 return new Promise(function(resolve_redurce2, reject_redurce2){
                                     if(!type || type == 'rekening'){
-                						jQuery.ajax({
-                			              	url: "../../hapus-rincian/"+config.id_daerah+"/"+id_unit,
-                			              	type: "POST",
-                			              	data:{"_token": jQuery('meta[name=_token]').attr('content'),"skrim":CR64('kodesbl='+kodesbl+'&idbelanjarinci='+idblrinci+'&jeniskk=0')},
-                			              	success: function(data){
+                                        relayAjax({
+                			              	// url: "../../hapus-rincian/"+config.id_daerah+"/"+id_unit,
+                			              	// data:{"_token": jQuery('meta[name=_token]').attr('content'),"skrim":CR64('kodesbl='+kodesbl+'&idbelanjarinci='+idblrinci+'&jeniskk=0')},
+                                            url: config.sipd_url+'daerah/main/?'+current_data,
+                                            type: "POST",
+                                            data:{
+                                                _token: _token,
+                                                v1bnA1m: v1bnA1m,
+                                                DsK121m: C3rYDq('jeniskk=0')
+                                            },
+                                            success: function(data){
                                                 resolve_redurce2();
                                             }
                                         });
@@ -1054,10 +633,17 @@ jQuery('#simpan-ganti-rek').on("click", function(){
                                         resolve_redurce2();
                                     }
         			          	}).then(function(){
-    			              		jQuery.ajax({
-    						          	url: "../../simpan-belanjarinci/"+config.id_daerah+"/"+id_unit,
-    						          	type: "POST",
-    						          	data:{"_token": jQuery('meta[name=_token]').attr('content'),"skrim":CR64(jQuery('#formdetilrincian').serialize())},
+                                    var customFormData = new FormData();
+                                    customFormData.append('_token', tokek);
+                                    customFormData.append('v1bnA1m', v1bnA1m);
+                                    customFormData.append('DsK121m', C3rYDq(jQuery('#formdetilrincian').serialize()));
+                                    // resolve(raw2); console.log(raw2);
+                                    relayAjax({
+                                        url: lru9,
+                                        type: "post",
+                                        data: customFormData,
+                                        processData: false,
+                                        contentType: false,
     						          	success: function(data){
     			              				resolve_redurce(nextData);
     						          	}
@@ -1089,7 +675,7 @@ jQuery('#simpan-ganti-rek').on("click", function(){
 			jQuery('#pilih-ganti-kelompok').html('');
 			jQuery('#ganti-keterangan-asal').html('');
 			jQuery('#pilih-ganti-keterangan').html('');
-			jQuery.ajax({
+			relayAjax({
                 url: "../../refresh-belanja/"+config.id_daerah+"/"+id_unit,
                 type: "post",
                 data:{"_token":jQuery('meta[name=_token]').attr('content'),"kodesbl": kodesbl},
@@ -1112,157 +698,3 @@ jQuery('#simpan-ganti-rek').on("click", function(){
         });
 	}
 });
-
-function tampil_edit_del(){
-  var kd_sbl = get_kd_sbl();
-  var id_unit = window.location.href.split('?')[0].split(''+config.id_daerah+'/')[1];
-  jQuery('#table_rinci_perubahan').DataTable().destroy();
-  jQuery('#table_rinci_perubahan').DataTable({
-      scrollY:'50vh',
-      autoWidth: true,
-      serverSide: false,
-      responsive: true,
-      processing: true,
-      pagingType: "full_numbers",
-      dom:'prltip',
-      pageLength: 20,
-      lengthMenu: [
-          [20, 50, 100, -1],
-          [20, 50, 100, "All"] // change per page values here
-      ],
-      language: {
-          search: '<span>Filter:</span> _INPUT_',
-          lengthMenu: '<span>Tampil:</span> _MENU_ <span>baris</span>',
-      },
-      ajax: {
-          url: config.sipd_url+'daerah/main/'+get_type_jadwal()+'/belanja/'+config.tahun_anggaran+'/rinci/tampil-rincian/'+config.id_daerah+'/'+id_unit+'?kodesbl='+kd_sbl
-      },
-      columns: [
-        {
-            class: "details-control",
-            orderable: false,
-            searchable: false,
-            data: null,
-            defaultContent: "<span class='p-l-10'><i class='fa fa-lg fa-info-circle text-info'></i></span>"
-        },
-        {data: 'subs_bl_teks', name: 'sb.subs_bl_teks', orderable: false,},
-        {data: 'ket_bl_teks', name: 'kt.ket_bl_teks', orderable: false,},
-        {data: 'nama_akun', name: 'ak.nama_akun', orderable: false,},
-        // {data: 'nama_standar_harga', name: 'kk.nama_standar_harga', orderable: false,},
-        {
-            className:"",
-            orderable: false,
-            searchable: true,
-            data: 'nama_standar_harga',
-            name: 'kk.nama_standar_harga',
-            render: function(data,type,full,meta){
-              if(data['spek_komponen']!=null){
-                return "<h5>"+data['nama_komponen']+"</h5><h5>"+data['spek_komponen']+"</h5>"+full['id_rinci_sub_bl'];
-              }
-              else{
-                return "<h5>"+data['nama_komponen']+"</h5>";
-              }
-              
-            }
-        },
-        {data: 'satuan', name: 'kk.satuan', orderable: false,},
-        {data: 'koefisien_murni', name: 'hrd.koefisien_murni', orderable: false, searchable: false,},
-        {data: 'harga_satuan_murni', name: 'hrd.harga_satuan_murni', orderable: false, searchable: false, className: 'text-right', render: $.fn.dataTable.render.number('.',',',0,'')},
-        {data: 'pajak_murni', name: 'pajak_murni', orderable: false, searchable: false, className: 'text-right', render: $.fn.dataTable.render.number('.',',',0,'')},
-        {data: 'rincian_murni', name: 'hrd.rincian_murni', orderable: false, searchable: false, className: 'text-right', render: $.fn.dataTable.render.number('.',',',0,'')},
-        {data: 'koefisien', name: 'rd.koefisien', orderable: false,},
-        {data: 'harga_satuan', name: 'rd.harga_satuan', orderable: false, searchable: false, className: 'text-right', render: $.fn.dataTable.render.number('.',',',0,'')},
-        {data: 'totalpajak', name: 'totalpajak', orderable: false, searchable: false, className: 'text-right', render: $.fn.dataTable.render.number('.',',',0,'')},
-        {data: 'rincian', name: 'rd.rincian', orderable: false, searchable: false, className: 'text-right', render: $.fn.dataTable.render.number('.',',',0,'')},
-        {
-          data: 'action', 
-          name: 'action', 
-          orderable: false, 
-          searchable: false, 
-          className: 'text-center', 
-          render: function(data,type,full,meta){
-            if(!data){
-              return ''
-              +'<a href="javascript:;" onclick="ubahKomponen(\''+kd_sbl+'\',\''+full.id_rinci_sub_bl+'\')" class="btn btn-info btn-outline btn-circle m-r-5"><i class="ti-pencil-alt"></i></a>'
-              +'<a href="javascript:;" onclick="hapusKomponen(\''+kd_sbl+'\',\''+full.id_rinci_sub_bl+'\')" class="btn btn-danger btn-outline btn-circle"><i class="ti-trash"></i></a>';
-            }else{
-              return data;
-            }
-          }
-      },
-      ],
-      columnDefs: [
-        {visible: false,targets: 1},
-        {visible: false,targets: 2},
-        {visible: false,targets: 3},
-      ],
-      order: [
-        [1, 'asc'],
-        [2, 'asc'],
-        [3, 'asc'],
-      ],
-      drawCallback: function(settings) {
-        var api = this.api();
-        var rows = api.rows({ page: 'current' }).nodes();
-        var last = null;
-        var last2 = null;
-        var last3 = null;
-        api.column(1, { page: 'current' }).data().each(function(group, i) {
-          if(group!==null){
-            if (last !== group) {
-                $(rows).eq(i).before('<tr class="group"><td colspan="15" class="font-xbold">' + group + '</td></tr>');
-                last = group;
-            }
-          }
-        });
-        api.column(2, { page: 'current' }).data().each(function(group, i) {
-          if(group!==null){
-            var rowData = api.column(1,{ page: 'current' }).data();
-            var group1 = rowData[i] + "." + group;
-            if (last2 !== group1) {
-                $(rows).eq(i).before('<tr class="group"><td colspan="15" class="font-bold">' + group + '</td></tr>');
-                last2 = group1;
-            }
-          }
-        });
-        api.column(3, { page: 'current' }).data().each(function(group, i) {
-            var rowData = api.column(1,{ page: 'current' }).data();
-            var rowData2 = api.column(2,{ page: 'current' }).data();
-            var group1 = rowData[i] + "." + rowData2[i] + "." + group;
-            if (last3 !== group1) {
-                $(rows).eq(i).before('<tr class="group"><td colspan="15" class="font-medium">' + group + '</td></tr>');
-                last3 = group1;
-            }
-        });
-      }
-    });
-}
-
-function get_kd_sbl(){
-  var kode_sbl = false;
-  jQuery('script').map(function(i, b){
-    var script = jQuery(b).html();
-    script = script.split('?kodesbl=');
-    if(script.length > 1){
-      script = script[1].split("'");
-      kode_sbl = script[0];
-    }
-  });
-  return kode_sbl;
-}
-
-function get_kd_bl(){
-  var kode_sbl = get_kd_sbl();
-  var _kode_bl = kode_sbl.split('.');
-  _kode_bl.pop();
-  kode_bl = _kode_bl.join('.');
-  return kode_bl;
-}
-
-function get_type_jadwal(){
-    if(jQuery('button[onclick="setFase()"]').text().indexOf('Perencanaan') == -1){
-        return 'budget';
-    }else{
-        return 'plan';
-    }
-}
